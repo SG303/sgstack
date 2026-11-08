@@ -27,8 +27,15 @@ Repo rules win on project specifics, never on the Git and security rules below.
 
 ## Making changes
 
-- Small, focused changes, one topic per branch. Do not refactor or reformat
-  code that the task does not touch.
+- Simplicity first: the minimum code that solves the request. No speculative
+  features, abstractions for single use, unrequested configurability or error
+  handling for impossible cases.
+- Small, focused changes, one topic per branch; every changed line traces to
+  the request. Match the existing style; do not refactor or reformat code the
+  task does not touch. Mention unrelated dead code instead of deleting it;
+  remove only what your own change made unused.
+- Turn tasks into verifiable goals: reproduce a bug with a failing test before
+  fixing it; for multi-step work state a short plan with a check per step.
 - Verify what you build: run the repo's tests, lint and build; add tests for
   new behaviour. For UI work start a test instance bound to `0.0.0.0` and give
   me the LAN and Tailscale URL, both checked to respond.
