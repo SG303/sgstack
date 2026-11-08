@@ -46,5 +46,4 @@ introduced in a format-only PR.
 
 ## Known deviations to clean up
 
-- scio backend: `requirements.txt` + pip instead of uv.
-- batzen: no ESLint yet (uses `svelte-check` only).
+- scio backend: no ruff yet.
