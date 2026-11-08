@@ -1,0 +1,33 @@
+# Dependabot config (SG303 baseline v1). Weekly on Sunday evening, minor and
+# patch updates grouped into one PR per ecosystem and merged automatically by
+# dependabot-auto-merge.yml once the checks pass. Majors come as separate PRs.
+# The 7-day cooldown skips versions younger than a week; security updates are
+# not delayed. Action SHAs in baseline/templates are not covered: update them
+# by hand when a repo's Dependabot bumps the same action.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /skills/ui-review/scripts
+    schedule:
+      interval: weekly
+      day: sunday
+      time: "22:00"
+      timezone: Europe/Zurich
+    cooldown:
+      default-days: 7
+    groups:
+      npm:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: sunday
+      time: "22:00"
+      timezone: Europe/Zurich
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        update-types: [minor, patch]

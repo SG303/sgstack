@@ -1,0 +1,24 @@
+[
+  {
+    "id": "book-bike",
+    "goal": "Book an e-bike for a day and submit the booking form",
+    "viewport": "desktop",
+    "steps": [
+      { "action": "click", "any": [{ "role": "link", "name": "Buchen" }, { "text": "Buchen" }] },
+      { "action": "fill", "any": [{ "label": "Name" }, { "placeholder": "Name" }], "value": "Anna Muster" },
+      { "action": "fill", "any": [{ "label": "E-Mail" }, { "placeholder": "E-Mail" }], "value": "anna@example.ch" },
+      { "action": "select", "any": [{ "label": "Velotyp" }, { "selector": "select" }], "value": "E-Bike" },
+      { "action": "click", "any": [{ "role": "button", "name": "Buchen" }, { "role": "button", "name": "Velo buchen" }, { "text": "OK" }] },
+      { "action": "expect", "any": [{ "text": "Danke" }] }
+    ]
+  },
+  {
+    "id": "find-prices-mobile",
+    "goal": "On a phone, find out what an e-bike costs",
+    "viewport": "mobile",
+    "steps": [
+      { "action": "expect", "any": [{ "text": "E-Bike" }] },
+      { "action": "expect", "any": [{ "text": "CHF 49" }] }
+    ]
+  }
+]

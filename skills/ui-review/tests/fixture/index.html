@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Velomiete</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="top">
+      <div class="logo">VELOMIETE SEELAND</div>
+      <div class="links">
+        <a href="#angebot">Angebot</a> <a href="#preise">Preise</a> <a href="#buchen">Buchen</a> <a href="#kontakt">Kontakt</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <img src="hero.svg" class="heroimg" />
+      <div class="herotext">
+        <div class="big">Velos mieten am See</div>
+        <p class="grey">
+          Bei uns können Sie unkompliziert und schnell sowie zu fairen Preisen und mit einem freundlichen Service, der Ihnen bei allen Fragen rund um das
+          Thema Velo, E-Bike, Routen und Ausflüge in der Region gerne weiterhilft, ein Velo für einen halben oder ganzen Tag mieten und die schönsten Ecken
+          am See entdecken, wobei wir Ihnen auch Helme, Schlösser und Kindersitze zur Verfügung stellen können.
+        </p>
+        <div class="cta" onclick="location.hash = 'buchen'">Jetzt loslegen!!</div>
+      </div>
+    </div>
+
+    <div class="urgency" id="urgency">Nur noch <b>2 Velos</b> verfügbar! Angebot endet in <span id="countdown">04:59</span></div>
+
+    <div class="section" id="angebot">
+      <div class="h">Unser Angebot</div>
+      <div class="cards">
+        <div class="card"><img src="bike.svg" /><div class="t">City-Velo</div><div class="s">Ab CHF 25.–</div></div>
+        <div class="card"><img src="bike.svg" /><div class="t">E-Bike</div><div class="s">Ab CHF 49.–</div></div>
+        <div class="card"><img src="bike.svg" /><div class="t">Tandem</div><div class="s">Ab CHF 59.–</div></div>
+      </div>
+    </div>
+
+    <div class="section" id="buchen">
+      <div class="h">Buchen</div>
+      <form id="form" novalidate>
+        <input id="name" placeholder="Name" />
+        <input id="mail" placeholder="E-Mail" />
+        <select id="type">
+          <option>City-Velo</option>
+          <option>E-Bike</option>
+          <option>Tandem</option>
+        </select>
+        <input id="date" type="date" />
+        <div class="small"><input type="checkbox" checked /> Ich möchte den Newsletter und Angebote von Partnern erhalten</div>
+        <div class="send" onclick="submitForm()">OK</div>
+        <div id="err" class="err"></div>
+      </form>
+      <div class="nothanks"><a href="#">Nein danke, ich zahle lieber den vollen Preis</a></div>
+    </div>
+
+    <div class="footer" id="kontakt">
+      <span class="tiny">Velomiete Seeland · Seestrasse 1 · 2500 Biel · <a href="#">Impressum</a> <a href="#">AGB</a></span>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

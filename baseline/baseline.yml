@@ -1,0 +1,150 @@
+# Baseline checklist for SG303 repositories.
+#
+# Read by the weekly repo health check (read-only) to report deviations.
+# Every check has:
+#   id       stable identifier, used in reports and in "Deviations from baseline"
+#   level    must | should
+#   applies  which repos the check is for (see "scopes" below)
+#   check    what must be true, in plain words
+#   how      a read-only way to verify it
+#
+# A repo can opt out of a check by listing its id under "Deviations from
+# baseline" in its AGENTS.md, with a reason. Report such checks as "deviation
+# accepted", not as a finding.
+
+version: 1
+
+scopes:
+  all: every non-archived repo owned by SG303
+  public: public repos
+  has-deps: repos with a package manifest (package.json, pyproject.toml, requirements*.txt, flake.nix) or a Dockerfile
+  has-workflows: repos with files in .github/workflows
+  has-ci: repos with code that can be built or tested
+  has-releases: repos with tags or GitHub releases
+  web-app: services with a web UI or API (currently scio, batzen)
+
+checks:
+  # Agent instructions
+  - id: agents-md
+    level: must
+    applies: all
+    check: AGENTS.md exists at the repo root as a regular file (not a symlink) and names the baseline version ("baseline v1").
+    how: read AGENTS.md on the default branch
+  - id: claude-md-import
+    level: must
+    applies: all
+    check: CLAUDE.md exists and imports AGENTS.md (`@AGENTS.md`); it adds only Claude-specific notes.
+    how: read CLAUDE.md on the default branch
+  - id: agents-md-commands
+    level: should
+    applies: has-ci
+    check: AGENTS.md lists the commands to set up, test, lint and run the project.
+    how: read AGENTS.md
+
+  # Tool canon (baseline/tools.md)
+  - id: dependabot
+    level: must
+    applies: has-deps
+    check: .github/dependabot.yml covers every ecosystem in the repo plus github-actions (if has-workflows) and docker (if a Dockerfile exists).
+    how: compare .github/dependabot.yml with the manifests in the repo
+  - id: no-renovate
+    level: must
+    applies: all
+    check: no Renovate config (renovate.json, renovate.json5, .renovaterc*, .github/renovate.json*).
+    how: list files
+  - id: tool-canon
+    level: should
+    applies: has-deps
+    check: package manager, linter, formatter and test runner match baseline/tools.md or are listed as a deviation.
+    how: read manifests, lockfiles and config files
+  - id: runtime-not-eol
+    level: must
+    applies: has-deps
+    check: no end-of-life runtime or base image (Node, Python, NixOS, images in Dockerfile/compose).
+    how: compare versions with https://endoflife.date/api/<product>.json
+  - id: image-pinned
+    level: should
+    applies: has-deps
+    check: base images in Dockerfiles and compose files use a version tag, not `latest` or no tag.
+    how: read Dockerfile and compose files
+
+  # CI and workflows
+  - id: ci
+    level: must
+    applies: has-ci
+    check: a workflow runs lint and tests on pull requests, and the latest run on the default branch is green.
+    how: read .github/workflows, `gh run list -b <default> -L 3`
+  - id: workflow-lint
+    level: should
+    applies: has-workflows
+    check: actionlint and zizmor run on changes to .github/workflows.
+    how: read .github/workflows
+  - id: actions-pinned
+    level: should
+    applies: has-workflows
+    check: every third-party `uses:` is pinned to a full commit SHA with a version comment.
+    how: grep `uses:` in .github/workflows
+  - id: workflow-permissions
+    level: must
+    applies: has-workflows
+    check: every workflow sets `permissions:` at the top level, read-only by default; write access only per job where needed.
+    how: read .github/workflows
+  - id: dependabot-auto-merge
+    level: should
+    applies: has-deps
+    check: minor and patch Dependabot PRs merge automatically after required checks pass.
+    how: read .github/workflows for dependabot/fetch-metadata and `gh pr merge --auto`
+  - id: codeql
+    level: should
+    applies: web-app
+    check: CodeQL code scanning is enabled (default setup or workflow).
+    how: "`gh api repos/SG303/<repo>/code-scanning/default-setup`"
+
+  # Repository settings
+  - id: ruleset-default-branch
+    level: must
+    applies: public
+    check: an active ruleset on the default branch requires a pull request, blocks force pushes and deletion, requires the CI checks (if has-ci) and has an empty bypass list.
+    how: "`gh api repos/SG303/<repo>/rulesets` and `gh api repos/SG303/<repo>/rules/branches/<default>`"
+  - id: secret-scanning
+    level: must
+    applies: public
+    check: secret scanning and push protection are enabled.
+    how: "`gh api repos/SG303/<repo> --jq .security_and_analysis`"
+  - id: dependabot-alerts
+    level: must
+    applies: has-deps
+    check: Dependabot alerts and security updates are enabled.
+    how: "`gh api repos/SG303/<repo>/vulnerability-alerts` (204 = on), `.security_and_analysis.dependabot_security_updates`"
+  - id: merge-settings
+    level: should
+    applies: all
+    check: squash merge only, auto-merge allowed, head branches deleted on merge.
+    how: "`gh api repos/SG303/<repo> --jq '{allow_squash_merge, allow_merge_commit, allow_rebase_merge, allow_auto_merge, delete_branch_on_merge}'`"
+
+  # Hygiene
+  - id: readme
+    level: must
+    applies: all
+    check: README.md explains what the project does and how to run it.
+    how: read README.md
+  - id: license
+    level: must
+    applies: public
+    check: a LICENSE file exists (MIT unless a deviation is recorded).
+    how: "`gh api repos/SG303/<repo> --jq .license.spdx_id`"
+  - id: changelog
+    level: should
+    applies: has-releases
+    check: CHANGELOG.md follows Keep a Changelog and its latest version matches the latest tag.
+    how: read CHANGELOG.md, `git tag --sort=-v:refname | head -1`
+  - id: gitignore-env
+    level: must
+    applies: all
+    check: .gitignore excludes .env files and local data; no .env or key files are tracked.
+    how: read .gitignore, `git ls-files`
+  - id: editorconfig
+    level: should
+    applies: all
+    check: .editorconfig exists.
+    how: list files

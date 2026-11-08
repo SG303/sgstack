@@ -1,0 +1,55 @@
+# Checks scripts, the baseline and its templates (SG303 baseline v1).
+# Make the "lint" and "templates" jobs required checks in the ruleset.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: shellcheck
+        run: git ls-files -z '*.sh' | xargs -0 shellcheck
+      - name: shfmt
+        uses: docker://mvdan/shfmt:v3.14.1@sha256:8c06884a35683d8763fba6c0d9484d11a61a96da65f8d497d6f625825a6043f2
+        with:
+          args: -d .
+      - name: Syntax check of the ui-review scripts
+        run: git ls-files -z '*.mjs' | xargs -0 -n1 node --check
+
+  templates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: Validate baseline.yml and template YAML
+        run: uv run --no-project --with pyyaml python scripts/check-baseline.py
+      - name: actionlint on the workflow templates
+        uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        with:
+          args: >-
+            -color
+            baseline/templates/workflows/ci-node.yml
+            baseline/templates/workflows/ci-python.yml
+            baseline/templates/workflows/dependabot-auto-merge.yml
+            baseline/templates/workflows/workflow-lint.yml
+      - name: zizmor on the templates
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
+        with:
+          inputs: baseline/templates
+          advanced-security: false

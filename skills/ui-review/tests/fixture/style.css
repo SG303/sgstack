@@ -1,0 +1,122 @@
+/* Deliberately flawed styles: fixed widths, low contrast, no focus styles. */
+* {
+  outline: none;
+}
+body {
+  margin: 0;
+  font-family: Verdana, sans-serif;
+  color: #555;
+  background: #fff;
+}
+.top {
+  width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+.logo {
+  font-weight: bold;
+  color: #e4002b;
+}
+.links a {
+  color: #aaa;
+  font-size: 11px;
+  text-decoration: none;
+  margin-left: 6px;
+}
+.hero {
+  width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 20px;
+}
+.heroimg {
+  width: 600px;
+}
+.big {
+  font-size: 34px;
+  color: #333;
+}
+.grey {
+  color: #b5b5b5;
+  font-size: 13px;
+}
+.cta {
+  display: inline-block;
+  background: #ffd84d;
+  color: #fff;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.urgency {
+  position: sticky;
+  top: 0;
+  background: #e4002b;
+  color: #ff9c9c;
+  padding: 18px;
+  text-align: center;
+  z-index: 10;
+}
+.section {
+  width: 1200px;
+  margin: 30px auto;
+}
+.h {
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+}
+.cards {
+  display: flex;
+  gap: 12px;
+}
+.card {
+  border: 1px solid #eee;
+  padding: 10px;
+  cursor: pointer;
+}
+.card img {
+  width: 260px;
+}
+.t {
+  color: #777;
+}
+.s {
+  color: #bbb;
+  font-size: 11px;
+}
+form input,
+form select {
+  display: block;
+  margin: 6px 0;
+  padding: 3px;
+  border: 1px solid #eee;
+}
+.small {
+  font-size: 10px;
+  color: #aaa;
+}
+.send {
+  display: inline-block;
+  background: #ddd;
+  color: #fff;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.err {
+  color: red;
+  font-size: 11px;
+}
+.nothanks a {
+  color: #ccc;
+  font-size: 10px;
+}
+.footer {
+  width: 1200px;
+  margin: 40px auto;
+}
+.tiny {
+  font-size: 9px;
+  color: #ccc;
+}

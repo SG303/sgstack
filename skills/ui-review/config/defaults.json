@@ -1,0 +1,113 @@
+{
+  "mode": "auto",
+  "maxIterations": 4,
+  "maxChangesPerIteration": 8,
+  "viewports": {
+    "desktop": {
+      "width": 1440,
+      "height": 900,
+      "isMobile": false
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "isMobile": true
+    }
+  },
+  "capture": {
+    "maxFullPageHeight": 8000,
+    "focusStops": 40,
+    "settleMs": 1200,
+    "darkMode": "auto",
+    "views": []
+  },
+  "cwv": {
+    "profile": "mobile",
+    "cpuSlowdown": 4,
+    "latencyMs": 150,
+    "downloadKbps": 1600,
+    "runs": 1
+  },
+  "gates": {
+    "axe": {
+      "critical": 0,
+      "serious": 0
+    },
+    "reflow320": true,
+    "focusVisible": true,
+    "clickableNotFocusable": 0,
+    "cwv": {
+      "enforce": true,
+      "lcpMs": 2500,
+      "cls": 0.1,
+      "tbtMs": 200,
+      "inpMs": 200
+    },
+    "tasks": {
+      "successRate": 1
+    },
+    "experts": {
+      "maxSeverity": 2
+    },
+    "deceptivePatterns": 0,
+    "ueqs": {
+      "pragmaticMean": 1.5,
+      "hedonicMean": 0.8,
+      "minJuror": 0.8
+    },
+    "sus": {
+      "mean": 80,
+      "minJuror": 68
+    },
+    "visawi": {
+      "mean": 5
+    },
+    "pairwise": {
+      "requireWinOrTie": true
+    }
+  },
+  "jury": {
+    "providers": "auto",
+    "opencode": false,
+    "audience": "",
+    "personas": [
+      {
+        "id": "first-timer-mobile",
+        "description": "First-time visitor on a phone, in a hurry. Belongs to the site's audience, but has never used this site before and wants to get the answer or finish the task quickly.",
+        "viewport": "mobile",
+        "aria": false
+      },
+      {
+        "id": "keyboard-screenreader",
+        "description": "Blind user who navigates with a screen reader and keyboard only. Judges the site from the accessibility tree, focus order and the task walkthrough, not from visual polish.",
+        "viewport": "desktop",
+        "aria": true
+      },
+      {
+        "id": "returning-power-user",
+        "description": "Experienced member of the site's audience on a desktop who uses the site weekly and wants to finish tasks with as few steps as possible.",
+        "viewport": "desktop",
+        "aria": false
+      }
+    ],
+    "matrix": "full",
+    "experts": "all",
+    "pairwiseBothOrders": true,
+    "concurrency": 4,
+    "timeoutSec": 480,
+    "maxImages": 12,
+    "models": {
+      "claude": "claude-opus-5-5",
+      "codex": "gpt-6.1-sol",
+      "opencode": "opencode/nemotron-3.5-super-vl-free"
+    },
+    "effort": {
+      "claude": "high",
+      "codex": "high"
+    },
+    "advisory": [
+      "opencode"
+    ],
+    "maxImagesPairwise": 24
+  }
+}
