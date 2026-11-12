@@ -11,6 +11,7 @@ everything in the repo; talk to me in German.
 - Install for all harnesses: `scripts/install.sh` (`--uninstall` removes the links)
 - Lint shell scripts: `shellcheck scripts/*.sh skills/*/scripts/*.sh && shfmt -d .`
 - Validate the baseline: `uv run --no-project --with pyyaml python scripts/check-baseline.py`
+- Test script installation and setup: `python3 -m unittest discover -s tests -v` (standard library, no network or model calls)
 - Lint the workflow templates: see "Changing global rules and the baseline" below
 - ui-review smoke test (no LLM calls, needs Chromium via `skills/ui-review/scripts/setup.sh`):
   `skills/ui-review/tests/smoke.sh`
@@ -18,7 +19,7 @@ everything in the repo; talk to me in German.
 ## Layout
 
 - `skills/<name>/SKILL.md`: one directory per skill. The directory name equals the `name` in the frontmatter.
-- `global/AGENTS.md`: global rules for every agent and repo, symlinked to `~/.codex/AGENTS.md`, `~/.claude/AGENTS.md` and `~/.config/opencode/AGENTS.md`.
+- `global/AGENTS.md`: global rules for every agent and repo, symlinked to `~/.codex/AGENTS.md`, `~/.claude/rules/sg303-global.md` and `~/.config/opencode/AGENTS.md`.
 - `baseline/`: tool canon (`tools.md`), checklist for the weekly health check (`baseline.yml`) and templates for other repos.
 - `scripts/install.sh`: symlinks skills and global rules into every harness.
 

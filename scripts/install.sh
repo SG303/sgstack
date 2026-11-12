@@ -8,8 +8,7 @@
 #
 # Global rules (global/AGENTS.md):
 #   ${CODEX_HOME:-~/.codex}/AGENTS.md  read by Codex
-#   ~/.claude/AGENTS.md                read by Claude Code (no import needed;
-#                                      an "@AGENTS.md" line would load it twice)
+#   ~/.claude/rules/sg303-global.md    read by Claude Code in every project
 #   ~/.config/opencode/AGENTS.md       read by opencode
 #
 # Existing files that are not links to this repo are never touched.
@@ -22,7 +21,7 @@ skill_targets=("$HOME/.claude/skills" "$HOME/.agents/skills")
 rules_src="$repo_root/global/AGENTS.md"
 rules_links=(
 	"${CODEX_HOME:-$HOME/.codex}/AGENTS.md"
-	"$HOME/.claude/AGENTS.md"
+	"$HOME/.claude/rules/sg303-global.md"
 	"${XDG_CONFIG_HOME:-$HOME/.config}/opencode/AGENTS.md"
 )
 mode=install
@@ -36,15 +35,21 @@ case "${1:-}" in
 	;;
 esac
 
+# Remove only links created by this installer; preserve user files and links.
+remove_owned_link() {
+	local src=$1 link=$2
+	if [[ -L $link && "$(readlink "$link")" == "$src" ]]; then
+		rm "$link"
+		echo "removed  $link"
+	fi
+}
+
 # link_one <source> <link>: create, keep or remove one symlink.
 link_one() {
 	local src=$1 link=$2
 
 	if [[ $mode == uninstall ]]; then
-		if [[ -L $link && "$(readlink "$link")" == "$src" ]]; then
-			rm "$link"
-			echo "removed  $link"
-		fi
+		remove_owned_link "$src" "$link"
 		return
 	fi
 
@@ -69,3 +74,10 @@ done
 for link in "${rules_links[@]}"; do
 	link_one "$rules_src" "$link"
 done
+
+# Migrate the legacy Claude link only after the new rule is available.
+# Uninstall also cleans up links from installations made before this migration.
+claude_rule="$HOME/.claude/rules/sg303-global.md"
+if [[ $mode == uninstall || (-L $claude_rule && "$(readlink "$claude_rule")" == "$rules_src") ]]; then
+	remove_owned_link "$rules_src" "$HOME/.claude/AGENTS.md"
+fi

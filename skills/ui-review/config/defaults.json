@@ -1,5 +1,5 @@
 {
-  "mode": "auto",
+  "mode": "audit",
   "maxIterations": 4,
   "maxChangesPerIteration": 8,
   "viewports": {

@@ -11,8 +11,8 @@ command -v node >/dev/null || {
 	exit 1
 }
 
-if [[ ! -d node_modules/playwright || ! -d node_modules/@axe-core/playwright || package.json -nt node_modules ]]; then
-	npm install --no-audit --no-fund --silent
+if [[ ! -d node_modules/playwright || ! -d node_modules/@axe-core/playwright || package.json -nt node_modules || package-lock.json -nt node_modules ]]; then
+	npm ci --no-audit --no-fund --silent
 	touch node_modules
 fi
 
