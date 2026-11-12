@@ -2,7 +2,7 @@
 
 Personal, harness-neutral agent stack: skills, global agent rules and the baseline for all SG303 repositories. Used with Claude Code, Codex and opencode via T3 Code.
 
-This repo defines the SG303 baseline and follows it (baseline v1): work on a
+This repo defines the SG303 baseline and follows it (baseline v2): work on a
 branch, open a PR, merge only with green checks (squash); English for
 everything in the repo; talk to me in German.
 

@@ -1,4 +1,4 @@
-# Global agent rules (SG303) · baseline v1
+# Global agent rules (SG303) · baseline v2
 
 Applies to every harness (Claude Code, Codex, opencode) and every repository.
 Source: `sgstack/global/AGENTS.md`, installed by `sgstack/scripts/install.sh`.
@@ -47,6 +47,8 @@ Repo rules win on project specifics, never on the Git and security rules below.
   log messages, commits, PRs, issues, changelog.
 - Run `shellcheck` and `shfmt -d` on shell scripts you write or change.
 - Frontend work: use the frontend-design skill when your harness has it.
+- README.md keeps the AI notice from `sgstack/baseline/templates/README-notice.md`;
+  add it to new repos.
 
 ## Git and GitHub
 

@@ -1,5 +1,5 @@
 # Merges minor and patch Dependabot PRs automatically once the required checks
-# pass (baseline v1). Majors stay open for review. Copy to
+# pass (baseline v2). Majors stay open for review. Copy to
 # .github/workflows/dependabot-auto-merge.yml.
 #
 # Needs in the repo settings: "Allow auto-merge" on, and a ruleset on the

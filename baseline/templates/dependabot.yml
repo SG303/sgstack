@@ -1,4 +1,4 @@
-# Dependabot config (baseline v1). Copy to .github/dependabot.yml and keep only
+# Dependabot config (baseline v2). Copy to .github/dependabot.yml and keep only
 # the ecosystems the repo uses. Weekly on Sunday evening, minor and patch
 # updates grouped into one PR per ecosystem; the auto-merge workflow merges
 # them once the required checks pass. Majors come as separate PRs for review.

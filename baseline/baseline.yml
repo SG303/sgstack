@@ -12,7 +12,7 @@
 # baseline" in its AGENTS.md, with a reason. Report such checks as "deviation
 # accepted", not as a finding.
 
-version: 1
+version: 2
 
 scopes:
   all: every non-archived repo owned by SG303
@@ -28,7 +28,7 @@ checks:
   - id: agents-md
     level: must
     applies: all
-    check: AGENTS.md exists at the repo root as a regular file (not a symlink) and names the baseline version ("baseline v1").
+    check: AGENTS.md exists at the repo root as a regular file (not a symlink) and names the baseline version ("baseline v2").
     how: read AGENTS.md on the default branch
   - id: claude-md-import
     level: must
@@ -127,6 +127,11 @@ checks:
     level: must
     applies: all
     check: README.md explains what the project does and how to run it.
+    how: read README.md
+  - id: readme-ai-notice
+    level: must
+    applies: all
+    check: README.md has the AI notice from baseline/templates/README-notice.md, a NOTE or WARNING box after the description and a "## Status" section at the end (before "## License" if present).
     how: read README.md
   - id: license
     level: must
