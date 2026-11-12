@@ -20,8 +20,8 @@ Run the skill as a fresh agent in a throwaway git repository that contains the f
 d=$(mktemp -d) && cp tests/fixture/* "$d" && mkdir -p "$d/.claude/skills" "$d/.agents/skills"
 ln -s "$PWD" "$d/.claude/skills/ui-review" && ln -s "$PWD" "$d/.agents/skills/ui-review"
 printf '.claude/\n.agents/\n' >"$d/.gitignore" && git -C "$d" init -q && git -C "$d" add -A && git -C "$d" commit -qm fixture
-(cd "$d" && claude -p "/ui-review max 2 Iterationen" --permission-mode bypassPermissions)
-(cd "$d" && codex exec --dangerously-bypass-approvals-and-sandbox '$ui-review max 2 Iterationen')
+(cd "$d" && claude -p "/ui-review improve the UI, max 2 iterations" --permission-mode bypassPermissions)
+(cd "$d" && codex exec --dangerously-bypass-approvals-and-sandbox '$ui-review improve the UI, max 2 iterations')
 ```
 
 Results of the first runs (2026-11-05), both with two iterations:

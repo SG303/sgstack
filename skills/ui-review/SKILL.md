@@ -1,11 +1,11 @@
 ---
 name: ui-review
-description: Use when the user asks to review, audit, rate or improve the UI/UX of a web page or web app ("ui-review", "review the UI", "improve the UX until ..."). Measures the page (WCAG 2.2 via axe-core, Core Web Vitals, reflow, keyboard focus, detected framework and design system), lets independent LLM jurors (Claude, Codex, optional OpenCode) do an expert review (Nielsen, ISO 9241-110, cognitive walkthrough, deceptive patterns, Laws of UX) and fill in UEQ-S, SUS and VisAWI-S as personas, then fixes the code in iterations until the acceptance gates pass. Produces a before/after report with screenshots, element crops, pixel diff and the exact code changes. Works with just a URL or with no input inside a project.
+description: Use when the user asks to review, audit, rate or improve the UI/UX of a web page or web app ("ui-review", "review the UI", "improve the UX until ..."). Reviews are read-only; code changes require an explicit request to improve or fix the UI. Measures the page (WCAG 2.2 via axe-core, Core Web Vitals, reflow, keyboard focus, detected framework and design system), lets independent LLM jurors (Claude, Codex, optional OpenCode) review it using UX frameworks and fill in UEQ-S, SUS and VisAWI-S as personas. Produces a report with screenshots and findings; authorized fixes add before/after element crops, pixel diff and the exact code changes. Works with just a URL or with no input inside a project.
 ---
 
 # UI review
 
-Evaluate a web UI against established frameworks and, when the source is available, improve it in iterations until the acceptance gates pass. The user judges the result from a before/after report.
+Evaluate a web UI against established frameworks. When the user explicitly requests improvements and the source is available, improve it in iterations until the acceptance gates pass. The user judges the result from the report.
 
 `S` below means the directory that contains this `SKILL.md`. Run scripts as `node S/scripts/<name>.mjs`. All output goes to `.ui-review/<run-id>/` in the project (or the current directory).
 
@@ -14,7 +14,7 @@ Read `S/references/frameworks.md` only if the user asks why a framework is used 
 ## Inputs (all optional)
 
 - A URL. Without one, detect and start the project in the current directory.
-- Mode: `fix` (default when the source code is in the current git repository) or `audit` (default for a bare URL to a site whose code is not here). An audit never edits files.
+- Mode: `audit` by default, including inside a source repository and for a bare `ui-review` invocation. Requests to review, audit or rate (including "reviewen", "prüfen" and "bewerten") do not authorize code changes. Use `fix` only when the user explicitly asks to improve or fix the UI (including "verbessern" and "beheben") or selects `fix` mode, and its source is available. An audit writes review artefacts but never changes project source, configuration or dependencies. A requested review followed by "fix the findings" authorizes `fix`; "suggest improvements" remains an audit.
 - Targets in plain words, for example "until all jurors give at least 1.5 on UEQ", "max 3 iterations", "only accessibility", "German personas", "use the free OpenCode models too". Translate them into a config override (next section).
 - Tasks the user cares about ("booking must work", "find the price").
 
@@ -26,9 +26,10 @@ Ask only if the target cannot be found or started. Everything else has a default
 2. Create the run: `RUN=.ui-review/$(date +%Y%m%d-%H%M)`, then `mkdir -p $RUN/iter-0`. In a git repository run `bash S/scripts/snapshot.sh exclude`, so `.ui-review/` never shows up in `git status`.
 3. Find the target:
    - URL given: use it.
-   - No URL: `node S/scripts/detect.mjs` proposes the stack, a start command and the URL. If the proposed port is busy (`portBusy`), check that the running server really serves this project (page title or a known asset) before reusing it; otherwise start your own on a free port. Install dependencies if `needsInstall` is true.
+   - No URL: `node S/scripts/detect.mjs` proposes the stack, a start command and the URL. If the proposed port is busy (`portBusy`), check that the running server really serves this project (page title or a known asset) before reusing it; otherwise start your own on a free port. In `fix` mode, install dependencies if `needsInstall` is true. In `audit` mode, report missing project dependencies as a blocker instead of installing them.
    - Start a server only through `bash S/scripts/server.sh start $RUN -- <command>` (it keeps the PID and log in `$RUN`), take the real URL from `$RUN/server.log` and run `bash S/scripts/server.sh wait URL`. Stop it with `bash S/scripts/server.sh stop $RUN` when the run ends; never use `pkill -f`. Note in the report when Web Vitals come from a dev server (pessimistic).
 4. Write `$RUN/config.json` holding the overrides from the user's words. Defaults are in `S/config/defaults.json`; a `ui-review.config.json` in the project root is merged too. Examples:
+   - Set `"mode"` to the mode authorized by the current request. A project config cannot authorize `fix` for a review-only request.
    - "all agents at least 1.5 UEQ" → `{"gates":{"ueqs":{"pragmaticMean":1.5,"hedonicMean":1.5,"minJuror":1.5}}}`
    - "max 3 iterations" → `{"maxIterations":3}`
    - Juror models are pinned in `jury.models` (Claude `claude-opus-5-5`, Codex `gpt-6.1-sol`) with `jury.effort` `high`, so scores stay comparable across runs. "use Sonnet as Claude juror" → `{"jury":{"models":{"claude":"claude-sonnet-5-5"}}}`. Changing models makes scores incomparable with earlier runs; say so in the report.
@@ -155,7 +156,7 @@ Safety: on a site that is not a local or staging instance, tasks must not submit
 ## Rules
 
 - Jurors stay independent: never pass them your own opinion, the previous scores or the change list. The scripts do the prompting.
-- Never edit files in `audit` mode, and never commit, push or deploy as part of this skill.
+- Never change project source, configuration or dependencies in `audit` mode; review artefacts and the local `.ui-review/` exclusion are allowed. Never commit, push or deploy as part of this skill.
 - Keep the user's content, branding and features. When a gate conflicts with an explicit user requirement, the requirement wins: waive the finding with that reason.
 - Business content belongs to the owner. Do not invent or change facts (prices, terms, promotions, legal texts, contact data, thresholds, what an action does) and do not rename the product's offers or core actions into something else (for example "Book" into "Demo request"). Improving wording that keeps the meaning is fine; shortening it for layout must keep it exact too ("Over 85%" is not "85%+" when exactly 85 % counts as borderline). When a finding needs owner input, waive it with the reason "owner content" and list it as an open question in the final answer.
 - Fix findings that come from a measurement artefact in the probe by waiving them with evidence (what you checked manually), not by changing the page around the probe.

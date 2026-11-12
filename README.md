@@ -21,7 +21,7 @@ Created in [T3 Code](https://t3.codes).
 | [`sol-loop`](skills/sol-loop/SKILL.md) | Write "sol loop" to review a change with one GPT Sol reviewer, resolve findings and recheck within a bounded round budget. |
 | [`takeover`](skills/takeover/SKILL.md) | Ask to take over a PR, branch or agent thread: recover its goal, finish the remaining work and preserve contributor credit. |
 | [`council`](skills/council/SKILL.md) | Write "council" for independent feedback from three models on different providers, with bounded review rounds and a synthesis of findings and disagreements. |
-| [`ui-review`](skills/ui-review/SKILL.md) | Review and improve a web UI against WCAG 2.2, Core Web Vitals, Nielsen, ISO 9241-110, deceptive patterns and the detected design system, with independent Claude/Codex jurors filling in UEQ-S, SUS and VisAWI-S. Iterates until the gates pass and writes a before/after report. Needs Node 18+; run `skills/ui-review/scripts/setup.sh` once. |
+| [`ui-review`](skills/ui-review/SKILL.md) | Review a web UI against WCAG 2.2, Core Web Vitals, Nielsen, ISO 9241-110, deceptive patterns and the detected design system, with independent Claude/Codex jurors filling in UEQ-S, SUS and VisAWI-S. Reviews are read-only; an explicit request to improve or fix the UI enables iterations and a before/after report. Needs Node 18+; run `skills/ui-review/scripts/setup.sh` once. |
 | [`yolo`](skills/yolo/SKILL.md) | Write "yolo" in a prompt and the agent implements, tests, commits, pushes, opens a PR, squash-merges it and completes the repo's established GitHub release process without asking. |
 
 ## Install
@@ -33,13 +33,24 @@ scripts/install.sh --uninstall  # remove those links again
 
 | Harness | Skills | Global rules |
 | --- | --- | --- |
-| Claude Code | `~/.claude/skills` | `~/.claude/AGENTS.md` (read directly; do not also import it from `~/.claude/CLAUDE.md`) |
+| Claude Code | `~/.claude/skills` | `~/.claude/rules/sg303-global.md` (user-level rules, loaded independently of project `CLAUDE.md` files) |
 | Codex | `~/.agents/skills` | `~/.codex/AGENTS.md` (or `$CODEX_HOME/AGENTS.md`) |
 | opencode | `~/.config/opencode/skills`, `~/.claude/skills`, `~/.agents/skills` | `~/.config/opencode/AGENTS.md` |
 
 Because everything is a symlink, `git pull` updates every harness at once.
 Re-run the installer after adding new skills to create their links. Existing
 files that are not links to this repo are left alone and reported.
+
+Re-run the installer to migrate the old Claude rules link. It removes
+`~/.claude/AGENTS.md` only if it points to this repo and the new rule was
+installed successfully. Uninstall also removes the owned legacy link.
+If your personal `~/.claude/CLAUDE.md` imports `@AGENTS.md`, remove that
+obsolete import after migrating. The installer never edits that file.
+In a fresh Claude Code session, use `/memory` to check that
+`~/.claude/rules/sg303-global.md` is loaded.
+
+Script regression tests (isolated temporary directories, no network or model calls):
+`python3 -m unittest discover -s tests -v`.
 
 ## Global rules and baseline
 
