@@ -17,7 +17,7 @@ Created in [T3 Code](https://t3.codes).
 
 | Skill | What it does |
 | --- | --- |
-| [`cpm`](skills/cpm/SKILL.md) | Write "cpm" to finalize the current task: check existing changes, commit, push, open or update a PR, squash-merge it and delete the branch. |
+| [`cpm`](skills/cpm/SKILL.md) | Write "cpm" to finalize the current task: check existing changes, commit, push, open or update a PR, squash-merge it, delete the branch and complete the GitHub release if the repo has a release process. |
 | [`sol-loop`](skills/sol-loop/SKILL.md) | Write "sol loop" to review a change with one GPT Sol reviewer, resolve findings and recheck within a bounded round budget. |
 | [`takeover`](skills/takeover/SKILL.md) | Ask to take over a PR, branch or agent thread: recover its goal, finish the remaining work and preserve contributor credit. |
 | [`council`](skills/council/SKILL.md) | Write "council" for independent feedback from three models on different providers, with bounded review rounds and a synthesis of findings and disagreements. |
