@@ -8,7 +8,7 @@ workflows everywhere, whichever agent does the work.
 | [`../global/AGENTS.md`](../global/AGENTS.md) | Global rules for every agent and repo. Installed for Claude Code and Codex by `scripts/install.sh`. |
 | [`tools.md`](tools.md) | Tool canon: one tool per job. |
 | [`baseline.yml`](baseline.yml) | Checklist the weekly repo health check compares every repo against. |
-| [`templates/`](templates) | Files to copy into a repo: `AGENTS.md`, `CLAUDE.md`, `.editorconfig`, `dependabot.yml` and workflows. |
+| [`templates/`](templates) | Files to copy into a repo: `AGENTS.md`, `CLAUDE.md`, `.editorconfig`, `dependabot.yml`, workflows and the README notice (`README-notice.md`). |
 
 ## Three layers
 
@@ -32,7 +32,10 @@ One PR per repo:
 2. Copy `templates/dependabot.yml` (only the ecosystems the repo uses),
    `templates/.editorconfig` and the matching workflows from
    `templates/workflows/`.
-3. After the merge, set the repository settings (done by me or with my OK,
+3. Add the AI notice from `templates/README-notice.md` to README.md: the
+   NOTE box (WARNING for experimental repos) after the description and the
+   `## Status` section at the end.
+4. After the merge, set the repository settings (done by me or with my OK,
    because agents must not change protections on their own):
    - Ruleset on the default branch: require a pull request (0 approvals),
      require the CI checks, block force pushes and deletion, empty bypass

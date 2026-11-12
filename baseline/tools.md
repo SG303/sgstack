@@ -1,4 +1,4 @@
-# Tool canon · baseline v1
+# Tool canon · baseline v2
 
 One tool per job, in every repository. Agents introduce new tools only from
 this list. A repo that needs something else records it under "Deviations from

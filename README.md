@@ -10,6 +10,9 @@ Personal agent stack that works across harnesses (Claude Code, Codex, opencode):
 
 Created in [T3 Code](https://t3.codes).
 
+> [!NOTE]
+> Personal project, built with AI coding agents under my supervision. Review the code carefully before you use it.
+
 ## Skills
 
 | Skill | What it does |
@@ -77,6 +80,12 @@ See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for provenance and license.
 ## Permissions
 
 A skill is an instruction, not a permission. If a harness asks before `git push` or `gh pr merge`, it still asks while a skill is active. Allow those commands in the harness's own permission settings if you want a fully hands-off run.
+
+## Status
+
+Personal project, built with AI coding agents under my supervision. There is
+no support and no stability guarantee; review the code carefully before you
+rely on it. See [LICENSE](LICENSE) for the warranty terms.
 
 ## License
 

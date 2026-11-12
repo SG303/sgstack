@@ -1,4 +1,4 @@
-# CI for Python projects with uv, ruff and pytest (baseline v1).
+# CI for Python projects with uv, ruff and pytest (baseline v2).
 # Copy to .github/workflows/ci.yml and adjust the paths if the project lives
 # in a subdirectory. Make the "test" job a required check in the ruleset.
 name: CI
