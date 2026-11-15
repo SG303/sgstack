@@ -46,4 +46,4 @@ introduced in a format-only PR.
 
 ## Known deviations to clean up
 
-- scio backend: no ruff yet.
+None. Accepted deviations are listed in each repo's AGENTS.md.
