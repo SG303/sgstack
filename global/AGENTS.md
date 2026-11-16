@@ -52,8 +52,8 @@ Repo rules win on project specifics, never on the Git and security rules below.
 
 ## Git and GitHub
 
-- Commit only as `SG303 <SG303@users.noreply.github.com>`. Never change the
-  git identity.
+- On GitHub, commit only as `SG303 <SG303@users.noreply.github.com>`. Never
+  change the git identity a repo or host is configured with.
 - Never push to the default branch: branch → PR → required checks green →
   squash-merge → delete branch.
 - Publish (commit, push, PR, merge) only when I say so: "commiten / pushen /
