@@ -9,7 +9,8 @@ everything in the repo; talk to me in German.
 ## Commands
 
 - Install for all harnesses: `scripts/install.sh` (`--uninstall` removes the links)
-- Lint shell scripts: `shellcheck scripts/*.sh skills/*/scripts/*.sh && shfmt -d .`
+- Lint shell scripts: `git ls-files -z '*.sh' | xargs -0 shellcheck && git ls-files -z '*.sh' | xargs -0 shfmt -d`
+  (`shfmt -d .` would also scan the untracked `node_modules`)
 - Validate the baseline: `uv run --no-project --with pyyaml python scripts/check-baseline.py`
 - Test script installation and setup: `python3 -m unittest discover -s tests -v` (standard library, no network or model calls)
 - Lint the workflow templates: see "Changing global rules and the baseline" below
@@ -20,7 +21,7 @@ everything in the repo; talk to me in German.
 
 - `skills/<name>/SKILL.md`: one directory per skill. The directory name equals the `name` in the frontmatter.
 - `global/AGENTS.md`: global rules for every agent and repo, symlinked to `~/.codex/AGENTS.md`, `~/.claude/rules/sg303-global.md` and `~/.config/opencode/AGENTS.md`.
-- `baseline/`: tool canon (`tools.md`), checklist for the weekly health check (`baseline.yml`) and templates for other repos.
+- `baseline/`: tool canon (`tools.md`), checklist (`baseline.yml`) and runbook (`weekly-check.md`) for the weekly health check, and templates for other repos.
 - `scripts/install.sh`: symlinks skills and global rules into every harness.
 
 ## Writing skills
@@ -36,6 +37,9 @@ everything in the repo; talk to me in German.
 - `global/AGENTS.md` is loaded into every session of every agent: keep it short (well under 100 lines), concrete and in English.
 - Templates must pass `actionlint` and `zizmor` (`docker run --rm -v "$PWD":/repo:ro -w /repo rhysd/actionlint:<version> baseline/templates/workflows/*.yml`, `uvx zizmor baseline/templates`). Pin actions to a full commit SHA with a version comment.
 - Bump the baseline version when a change needs action in other repos (see `baseline/README.md`).
+- Never loosen a rule, safeguard or skill boundary unless the task asks for
+  exactly that, and name every loosened rule in the PR description. These files
+  constrain the agents that edit them.
 
 ## Workflow
 

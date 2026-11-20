@@ -13,7 +13,7 @@ Repo rules win on project specifics, never on the Git and security rules below.
 - A question is a question: "Wie aufwendig wäre …?" or "Was hältst du davon?"
   means answer or estimate, not build.
 - For anything beyond a small fix: propose 2–3 options with trade-offs and a
-  recommendation, then wait for my decision.
+  recommendation, then wait for my decision; under `yolo`, pick it yourself.
 - If something is unclear, ask. Push back when a simpler or safer way exists.
 
 ## Before changing anything
@@ -47,8 +47,9 @@ Repo rules win on project specifics, never on the Git and security rules below.
   log messages, commits, PRs, issues, changelog.
 - Run `shellcheck` and `shfmt -d` on shell scripts you write or change.
 - Frontend work: use the frontend-design skill when your harness has it.
-- README.md keeps the AI notice from `sgstack/baseline/templates/README-notice.md`;
-  add it to new repos.
+- Keep README.md and AGENTS.md accurate: update the setup, commands, paths and
+  behavior they describe in the same PR. README.md keeps the AI notice from
+  `sgstack/baseline/templates/README-notice.md`; add it to new repos.
 
 ## Git and GitHub
 
