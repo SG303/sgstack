@@ -13,6 +13,11 @@ YOLO is implementation plus `cpm`. This skill covers the implementation; the
 `cpm` skill covers everything from commit to release. The repo's own rules win
 over every default below.
 
+Rules that ask you to propose options and wait before larger changes are
+answered in advance: choose the option you would recommend and name it and the
+alternatives in the final report. Stop and ask only when the options differ in
+data loss, security or user-visible behavior that the request does not settle.
+
 ## Flow
 
 1. **Learn the repo rules.** Read `AGENTS.md` / `CLAUDE.md`, `CONTRIBUTING*`,

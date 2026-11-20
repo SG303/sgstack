@@ -4,6 +4,7 @@ Run: uv run --no-project --with pyyaml python scripts/check-baseline.py
 """
 
 import pathlib
+import re
 import sys
 
 import yaml
@@ -34,6 +35,14 @@ for path in [
 ]:
     if version not in path.read_text():
         errors.append(f"{path.relative_to(root)} does not name {version}")
+
+# Every file that names a baseline version must name the current one, so
+# copies of the templates in this repo cannot keep an outdated header.
+for path in sorted([*(root / ".github").rglob("*"), *(root / "baseline").rglob("*")]):
+    if path.is_file():
+        for found in re.findall(r"baseline v(\d+)", path.read_text()):
+            if f"baseline v{found}" != version:
+                errors.append(f"{path.relative_to(root)} names baseline v{found}")
 
 for path in sorted((root / "baseline/templates").rglob("*.yml")):
     yaml.safe_load(path.read_text())

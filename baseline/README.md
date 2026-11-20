@@ -5,9 +5,10 @@ workflows everywhere, whichever agent does the work.
 
 | File | Purpose |
 | --- | --- |
-| [`../global/AGENTS.md`](../global/AGENTS.md) | Global rules for every agent and repo. Installed for Claude Code and Codex by `scripts/install.sh`. |
+| [`../global/AGENTS.md`](../global/AGENTS.md) | Global rules for every agent and repo. Installed for Claude Code, Codex and opencode by `scripts/install.sh`. |
 | [`tools.md`](tools.md) | Tool canon: one tool per job. |
 | [`baseline.yml`](baseline.yml) | Checklist the weekly repo health check compares every repo against. |
+| [`weekly-check.md`](weekly-check.md) | Runbook of the weekly repo health check. |
 | [`templates/`](templates) | Files to copy into a repo: `AGENTS.md`, `CLAUDE.md`, `.editorconfig`, `dependabot.yml`, workflows and the README notice (`README-notice.md`). |
 
 ## Three layers
@@ -18,7 +19,9 @@ workflows everywhere, whichever agent does the work.
    GitHub blocks what must never happen, whatever the agent does.
 3. **Drift check** (`baseline.yml` + the weekly read-only health check):
    deviations show up in the weekly report. Fixes happen in a separate,
-   normal PR flow.
+   normal PR flow. The check is a T3 Code scheduled task with a short prompt
+   that reads [`weekly-check.md`](weekly-check.md) from GitHub, so changes to
+   the check go through a PR like everything else.
 
 ## Bringing a repo up to the baseline
 

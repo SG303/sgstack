@@ -1,6 +1,7 @@
 # Baseline checklist for SG303 repositories.
 #
-# Read by the weekly repo health check (read-only) to report deviations.
+# Read by the weekly repo health check (read-only, see weekly-check.md) to
+# report deviations.
 # Every check has:
 #   id       stable identifier, used in reports and in "Deviations from baseline"
 #   level    must | should
@@ -28,7 +29,7 @@ checks:
   - id: agents-md
     level: must
     applies: all
-    check: AGENTS.md exists at the repo root as a regular file (not a symlink) and names the baseline version ("baseline v2").
+    check: AGENTS.md exists at the repo root as a regular file (not a symlink) and names the current baseline version ("baseline v<version>" with the version from this file).
     how: read AGENTS.md on the default branch
   - id: claude-md-import
     level: must
@@ -84,6 +85,11 @@ checks:
     applies: has-workflows
     check: every third-party `uses:` is pinned to a full commit SHA with a version comment.
     how: grep `uses:` in .github/workflows
+  - id: template-copies
+    level: should
+    applies: has-workflows
+    check: files copied from baseline/templates (workflows, dependabot.yml, .editorconfig) name the current baseline version in their header and match the template, apart from adjustments the repo needs (branch name, paths, ecosystems, extra steps).
+    how: compare each copied file with the template on the sgstack default branch
   - id: workflow-permissions
     level: must
     applies: has-workflows
@@ -128,6 +134,11 @@ checks:
     applies: all
     check: README.md explains what the project does and how to run it.
     how: read README.md
+  - id: docs-current
+    level: should
+    applies: all
+    check: paths, scripts and commands named in README.md and AGENTS.md exist in the repo, and new top-level directories, package scripts or workflows are mentioned where these files list them. Runtime and generated paths (git-ignored files, data/, dist/) do not count.
+    how: compare the paths and commands in README.md and AGENTS.md with the repo tree, the package scripts and .github/workflows
   - id: readme-ai-notice
     level: must
     applies: all
