@@ -73,8 +73,11 @@ and workflows.
 from distinct providers, unless you explicitly choose a smaller council.
 They use T3 Code delegation when needed, or the harness's supported subagents
 when those can run the selected models. Missing models are reported rather
-than silently replaced. Repository instructions or your request can specify
-model versions and council members; no model identifiers are hardcoded.
+than silently replaced. The default council members (harness, model and
+reasoning effort) are fixed in
+[`skills/council/members.md`](skills/council/members.md); repository
+instructions or your request can override them. `sol-loop` resolves the
+latest GPT Sol model at run time.
 
 Examples:
 

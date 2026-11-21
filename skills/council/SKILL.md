@@ -17,12 +17,11 @@ already authorized, address known issues within scope before requesting
 review; otherwise include them in the brief without changing code.
 
 Honor council members named by the user or repository instructions.
-Otherwise choose one strong current model from each of three distinct
-providers, at high reasoning effort where supported. Resolve actual model
-identifiers and supported settings rather than hardcoding versions. If a
-named member or three providers are unavailable, report the limitation and
-ask whether the user wants a smaller council or different members. Do not
-silently substitute models or present one provider as three.
+Otherwise use the default members in `members.md` next to this skill, with
+exactly the listed harness, model and reasoning effort. If a member is
+unavailable, report the limitation and ask whether the user wants a smaller
+council or different members. Do not silently substitute models or present
+one provider as three.
 
 ## Independent reviews
 

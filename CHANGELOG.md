@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- `council` uses fixed default members from `skills/council/members.md` (Claude Code Opus 5.5, Codex GPT Sol 6.2 and Antigravity Gemini Neon, each at high effort) instead of picking models at run time.
 - `yolo` treats a referenced issue's acceptance criteria and verification steps as the definition of done, and `cpm` links the implemented issue with `Closes #<number>`.
 - The global commit identity rule now applies to GitHub; agents keep the git identity a repo or host is configured with elsewhere.
 - `cpm` now completes the repo's established GitHub release process after merging; repos without releases are unaffected.
