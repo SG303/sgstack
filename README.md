@@ -20,6 +20,7 @@ Created in [T3 Code](https://t3.codes).
 | [`cpm`](skills/cpm/SKILL.md) | Write "cpm" to finalize the current task: check existing changes, commit, push, open or update a PR, squash-merge it, delete the branch and complete the GitHub release if the repo has a release process. |
 | [`sol-loop`](skills/sol-loop/SKILL.md) | Write "sol loop" to review a change with one GPT Sol reviewer, resolve findings and recheck within a bounded round budget. |
 | [`takeover`](skills/takeover/SKILL.md) | Ask to take over a PR, branch or agent thread: recover its goal, finish the remaining work and preserve contributor credit. |
+| [`grill`](skills/grill/SKILL.md) | Write "grill" with an idea to be interviewed in rounds of questions with recommended answers, then get a confirmed spec with acceptance criteria and verification steps as a GitHub issue. Plans only; build it with `yolo #<issue>`. |
 | [`council`](skills/council/SKILL.md) | Write "council" for independent feedback from three models on different providers, with bounded review rounds and a synthesis of findings and disagreements. |
 | [`ui-review`](skills/ui-review/SKILL.md) | Review a web UI against WCAG 2.2, Core Web Vitals, Nielsen, ISO 9241-110, deceptive patterns and the detected design system, with independent Claude/Codex jurors filling in UEQ-S, SUS and VisAWI-S. Reviews are read-only; an explicit request to improve or fix the UI enables iterations and a before/after report. Needs Node 18+; run `skills/ui-review/scripts/setup.sh` once. |
 | [`yolo`](skills/yolo/SKILL.md) | Write "yolo" in a prompt and the agent implements, tests, commits, pushes, opens a PR, squash-merges it and completes the repo's established GitHub release process without asking. |
@@ -86,6 +87,8 @@ or `yolo` when you want their respective shipping workflows. `takeover` is
 self-contained and does not require the other tstack skills.
 
 The three skills are adapted from [t3dotgg/tstack](https://github.com/t3dotgg/tstack).
+The interview style of `grill` is adapted from
+[mattpocock/skills](https://github.com/mattpocock/skills).
 See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for provenance and license.
 
 ## Permissions

@@ -8,12 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- New `grill` skill interviews you about an idea in rounds of questions with recommended answers and writes the confirmed plan as a GitHub spec issue with acceptance criteria and verification steps.
 - The weekly repo health check is versioned as `baseline/weekly-check.md`; the scheduled task only reads it from GitHub.
 - New `should` check `template-copies` reports copied workflows and configs that drift from the templates or name an old baseline version.
 - New `should` check `docs-current` reports paths, scripts and commands in README.md and AGENTS.md that no longer exist, and new ones the docs miss; the global rules ask agents to update both files in the same PR.
 
 ### Changed
 
+- `yolo` treats a referenced issue's acceptance criteria and verification steps as the definition of done, and `cpm` links the implemented issue with `Closes #<number>`.
 - The global commit identity rule now applies to GitHub; agents keep the git identity a repo or host is configured with elsewhere.
 - `cpm` now completes the repo's established GitHub release process after merging; repos without releases are unaffected.
 - `yolo` now implements and tests the change, then hands off to `cpm` for commit, merge and release, so the shipping steps live in one place.

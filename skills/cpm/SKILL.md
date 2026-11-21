@@ -23,7 +23,8 @@ this task only. Follow the repository's own rules.
    unless the repository specifies another convention. If already committed,
    continue without creating an empty commit.
 5. Push the branch. Update its existing PR or create one using the repository's
-   template. Describe the final changes and validation.
+   template. Describe the final changes and validation. If the task
+   implements an issue, add `Closes #<number>`.
 6. Merge after required checks and reviews pass. Default to squash merge
    and delete the branch, unless the repository specifies otherwise. If the
    harness cannot wait for checks and the repo has auto-merge, enable it and
