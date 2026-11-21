@@ -28,6 +28,8 @@ data loss, security or user-visible behavior that the request does not settle.
    `<type>/<short-slug>`. If you are already on a feature branch that holds
    the user's work, keep it.
 3. **Implement** the requested change. Keep the diff to what was asked.
+   If the task names an issue, read it with its comments; its acceptance
+   criteria and verification steps define done.
 4. **Test the change itself.** Prove that the new or changed behavior works.
    Add or update automated tests where the repo has a test setup, and also
    run the change for real (run the script or CLI, call the endpoint, open
