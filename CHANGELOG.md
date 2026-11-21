@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- New `review` skill performs a lightweight, read-only review of a project, selected code, diff, PR or non-code artifact covering bugs, security, best practices, requirements fit, concrete improvements and potential new features.
 - New `grill` skill interviews you about an idea in rounds of questions with recommended answers and writes the confirmed plan as a GitHub spec issue with acceptance criteria and verification steps.
 - The weekly repo health check is versioned as `baseline/weekly-check.md`; the scheduled task only reads it from GitHub.
 - New `should` check `template-copies` reports copied workflows and configs that drift from the templates or name an old baseline version.

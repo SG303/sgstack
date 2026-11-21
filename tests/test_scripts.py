@@ -65,6 +65,25 @@ class ScriptTests(unittest.TestCase):
         self.install("--uninstall")
         self.assertEqual(legacy.readlink(), self.work / "other-rules.md")
 
+    def test_install_links_and_uninstalls_every_skill(self):
+        skills = sorted(p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md"))
+        self.assertIn("review", skills)
+        unrelated = self.work / ".claude/skills/custom-skill"
+        unrelated.mkdir(parents=True)
+        (unrelated / "SKILL.md").write_text("unrelated\n")
+
+        self.install()
+        for base in (self.work / ".claude/skills", self.work / ".agents/skills"):
+            for skill in skills:
+                self.assertEqual((base / skill).readlink(), ROOT / "skills" / skill)
+
+        self.install("--uninstall")
+        for base in (self.work / ".claude/skills", self.work / ".agents/skills"):
+            for skill in skills:
+                self.assertFalse((base / skill).exists())
+                self.assertFalse((base / skill).is_symlink())
+        self.assertTrue((unrelated / "SKILL.md").is_file())
+
     def prepare_setup(self, installed):
         script = self.work / "setup.sh"
         shutil.copyfile(ROOT / "skills/ui-review/scripts/setup.sh", script)
