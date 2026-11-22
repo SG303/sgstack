@@ -1,6 +1,6 @@
 # Expert review checklist
 
-Condensed from the frameworks listed in `frameworks.md`. Jurors receive this file verbatim.
+Condensed from the frameworks listed in `frameworks.md`. Jurors receive this file verbatim. Apply these rules proportionally to the product profile (`kind` and `density`): do not impose landing-page norms on dense specialist tools, and never trade away visual calm for unnecessary chrome.
 
 ## 1. WCAG 2.2 level AA: criteria that need judgment
 
@@ -50,7 +50,7 @@ Suitability for the user's tasks, self-descriptiveness, conformity with user exp
 3. Will the user associate the correct action with the effect they want?
 4. After the action, will the user see that progress is being made?
 
-A "no" on any question for a core task is at least severity 3.
+Rate a "no" as severity 3-4 only when it blocks or clearly misleads users on a core task; minor friction is severity 1-2.
 
 ## 5. Laws of UX (cite by name)
 
@@ -58,27 +58,28 @@ Fitts (size and distance of targets), Hick (number of choices), Jakob (follow co
 
 ## 6. Visual design
 
-- One clear primary action per view; visual hierarchy matches task priority.
-- Type: a consistent scale, body text at least 16 px, line length about 45-75 characters, adequate line height.
-- Spacing: a consistent scale (for example 4/8 px); related items close, unrelated items apart.
+- Clear visual hierarchy matching task priority (marketing/checkout pages usually need one dominant primary action; dense apps, tools and dashboards may legitimately have multiple peer actions).
+- Visual calm and restraint: avoid unnecessary cards-in-cards, heavy borders, redundant helper prose, or decorative clutter that competes with core content.
+- Type: a consistent scale; prose body text typically 15-16 px with line length about 45-75 characters and adequate line height; compact controls, tables, captions and badges in `app` profiles may be smaller if crisp and high-contrast.
+- Spacing: a consistent scale (for example 4/8 px); related items close, unrelated items apart, matching the target `density`.
 - Alignment to a grid; consistent component styling (radius, borders, shadows).
 - Colour: defined roles (primary, surface, text, error, success), enough contrast, works in dark mode if offered.
 - Imagery is relevant, sharp and correctly sized.
 
 ## 7. Content and microcopy
 
-- Plain language; readability scores: Amstad (German) or Flesch (English) of at least 60 for a general audience.
+- Plain language; readability scores (Amstad for German, Flesch for English, >= 60) apply to general-audience prose (`marketing`/`content`), not specialist tools, dashboards or short UI labels.
 - Buttons say what happens ("Book bike", not "OK"); the same action keeps the same name throughout.
 - Error messages state what went wrong and how to fix it; no blame, no "Error!".
-- Consistent terminology; no unexplained jargon.
+- Consistent terminology; no unexplained jargon outside the audience's domain.
 
 ## 8. Forms
 
-Visible persistent labels, sensible input types and `autocomplete`, required fields marked, inline validation after leaving a field, errors next to the field and summarised, single column, a primary submit button that is a real `<button>`.
+Visible persistent labels, sensible input types and `autocomplete`, required fields marked, inline validation after leaving a field, errors next to the field (add an error summary only for longer multi-field forms), a primary submit button that is a real `<button>`. Use single-column layout for long consumer forms; compact multi-column rows (filters, calculators, related short inputs, toolbars) are fine when scanning order is clear.
 
 ## 9. Mobile and responsive
 
-`<meta name="viewport">` present; no horizontal scrolling; touch targets ideally 44-48 px; primary actions in thumb reach; no hover-only interactions; form inputs at least 16 px font size (prevents iOS zoom).
+`<meta name="viewport">` present; no horizontal scrolling; WCAG 2.5.8 minimum target size is 24 x 24 CSS px (or adequate spacing, excluding inline text links); 44-48 px is an ideal target for primary touch controls, not a reason to inflate every secondary link, chip or compact control; no hover-only interactions; form inputs at least 16 px font size (prevents iOS zoom).
 
 ## 10. Performance as experience
 
@@ -90,4 +91,4 @@ Confirmshaming, fake urgency or scarcity (countdowns that reset), preselected co
 
 ## 12. Trust and credibility
 
-Who is behind the site (contact, imprint where legally required, e.g. Impressum in DACH), transparent prices, privacy information, social proof that is verifiable, no broken or placeholder content.
+For public commercial or marketing sites: who is behind the site (contact, imprint where legally required, e.g. Impressum in DACH), transparent prices, privacy information, verifiable social proof, no broken or placeholder content. Do not demand marketing trust badges, social proof or legal footers on internal tools, local apps or utilities.

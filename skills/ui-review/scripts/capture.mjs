@@ -38,7 +38,7 @@ try {
 async function newPage(vp, extra = {}) {
   const context = await browser.newContext({
     viewport: { width: vp.width, height: vp.height },
-    deviceScaleFactor: 1,
+    deviceScaleFactor: cfg.capture.deviceScaleFactor ?? 2,
     isMobile: !!vp.isMobile,
     hasTouch: !!vp.isMobile,
     reducedMotion: "reduce",
@@ -385,7 +385,7 @@ async function capture() {
     console.log(JSON.stringify(existing.summary, null, 2));
     return;
   }
-  const out = { url, capturedAt: new Date().toISOString(), viewports: {}, consoleErrors: [], axe: [], stack: null };
+  const out = { url, capturedAt: new Date().toISOString(), deviceScaleFactor: cfg.capture.deviceScaleFactor ?? 2, viewports: {}, consoleErrors: [], axe: [], stack: null };
   const axeLists = [];
   let darkCss = false;
 

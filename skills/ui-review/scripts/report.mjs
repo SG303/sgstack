@@ -10,7 +10,7 @@ import path from "node:path";
 import { chromium } from "playwright";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
-import { parseArgs, loadConfig, readJSON, writeJSON, die, listIterations } from "./lib/common.mjs";
+import { parseArgs, loadConfig, readJSON, writeJSON, die, listIterations, mean, round } from "./lib/common.mjs";
 import { readPng, writePng, padPng } from "./lib/images.mjs";
 
 const args = parseArgs();
@@ -37,6 +37,8 @@ function load(dir) {
     personas: readJSON(path.join(dir, "jury/personas.json"), null),
     experts: readJSON(path.join(dir, "jury/experts.json"), null),
     pairwise: readJSON(path.join(dir, "jury/pairwise.json"), null),
+    pairwiseBaseline: readJSON(path.join(dir, "jury/pairwise-baseline.json"), null),
+    worklist: readJSON(path.join(dir, "worklist.json"), null),
     changes: readJSON(path.join(dir, "changes.json"), []),
     patch: fs.existsSync(path.join(dir, "changes.patch")) ? fs.readFileSync(path.join(dir, "changes.patch"), "utf8") : "",
   };
@@ -131,10 +133,42 @@ const gateRows = (() => {
   return ids.map((id) => ({ id, before: bg.find((g) => g.id === id), after: fg.find((g) => g.id === id) }));
 })();
 
+function aggregateJurors(list) {
+  const by = new Map();
+  for (const j of list || []) {
+    const k = `${j.persona}|${j.provider}`;
+    if (!by.has(k)) by.set(k, []);
+    by.get(k).push(j);
+  }
+  const out = new Map();
+  for (const [k, rows] of by.entries()) {
+    const ok = rows.filter((r) => r.ok && r.scores);
+    const latest = rows[rows.length - 1];
+    const avg = (field) => {
+      const xs = ok.map((r) => r.scores?.[field]).filter((v) => typeof v === "number");
+      return xs.length ? round(mean(xs)) : null;
+    };
+    out.set(k, {
+      ...latest,
+      ok: ok.length > 0,
+      rounds: ok.length,
+      scores: ok.length
+        ? {
+            ueqsPragmatic: avg("ueqsPragmatic"),
+            ueqsHedonic: avg("ueqsHedonic"),
+            ueqsOverall: avg("ueqsOverall"),
+            sus: avg("sus"),
+            visawi: avg("visawi"),
+          }
+        : null,
+    });
+  }
+  return out;
+}
+
 function scoreTable() {
-  const key = (j) => `${j.persona}|${j.provider}`;
-  const b = new Map((base.personas?.jurors || []).map((j) => [key(j), j]));
-  const f = new Map((fin.personas?.jurors || []).map((j) => [key(j), j]));
+  const b = aggregateJurors(base.personas?.jurors);
+  const f = aggregateJurors(fin.personas?.jurors);
   return [...new Set([...b.keys(), ...f.keys()])].map((k) => ({ key: k, before: b.get(k), after: f.get(k) }));
 }
 
@@ -150,6 +184,19 @@ const counted = (g) => (g?.gates || []).filter((x) => comparable.has(x.id)).leng
 const finalPass = !!fin.gates?.pass;
 const iterationsDone = all.length - 1;
 const remaining = (fin.experts?.findings || []).filter((f) => f.severity >= 2);
+const advisoryProviders = new Set(cfg.jury.advisory || []);
+const strengths = [
+  ...new Set(
+    (fin.experts?.reviews || [])
+      .filter((r) => r.ok && !r.advisory && !advisoryProviders.has(r.provider))
+      .flatMap((r) => (Array.isArray(r.strengths) ? r.strengths : []))
+      .map((s) => String(s || "").trim())
+      .filter(Boolean),
+  ),
+];
+const defectIds = new Set((fin.worklist?.defects || []).map((d) => d.findingId).filter(Boolean));
+const openDefects = remaining.filter((f) => defectIds.has(f.id) || f.kind === "defect" || f.category === "deceptive-pattern");
+const openSuggestions = remaining.filter((f) => !openDefects.includes(f));
 const waivers = readJSON(path.join(runDir, "waivers.json"), []);
 
 const verdict = sameState
@@ -283,9 +330,11 @@ pre { overflow: auto; font-size: 12px; line-height: 1.45; background: #f4f5f7; p
   <div class="meta">
     <span>Run ${esc(path.basename(runDir))}</span>
     <span>Stack: ${esc((fin.capture.stack?.detected || []).map((s) => s.name).join(", ") || "no framework detected")}</span>
-    ${fin.pairwise ? `<span>Blind comparison, last iteration: ${esc(fin.pairwise.verdict)} (${fin.pairwise.tally.after} for new, ${fin.pairwise.tally.before} for old, ${fin.pairwise.tally.tie} tie)</span>` : ""}
+    ${fin.pairwise ? `<span>Blind comparison, last iteration: ${esc(fin.pairwise.verdict)} (${fin.pairwise.tally.after} for new, ${fin.pairwise.tally.before} for old, ${fin.pairwise.tally.tie} tie${fin.pairwise.providerAgainst?.length ? `; against: ${esc(fin.pairwise.providerAgainst.join(", "))}` : ""})</span>` : ""}
+    ${fin.pairwiseBaseline ? `<span>Blind comparison vs. ${esc(base.name)}: ${esc(fin.pairwiseBaseline.verdict)} (${fin.pairwiseBaseline.tally.after} for new, ${fin.pairwiseBaseline.tally.before} for original, ${fin.pairwiseBaseline.tally.tie} tie)</span>` : ""}
     ${run.mode ? `<span>Mode: ${esc(run.mode)}</span>` : ""}
     ${cfg.jury.audience ? `<span>Audience: ${esc(cfg.jury.audience)}</span>` : ""}
+    ${cfg.profile?.kind && cfg.profile.kind !== "auto" ? `<span>Profile: ${esc(cfg.profile.kind)} (${esc(cfg.profile.density || "standard")})</span>` : ""}
   </div>
   ${borderline.length ? `<p class="note">Within noise (closer to the target than one standard error): ${esc(borderline.join(", "))}. Treat these results as uncertain.</p>` : ""}
   ${taskChanges.length ? `<p class="note">Task definitions changed between ${esc(base.name)} and ${esc(fin.name)}: ${esc(taskChanges.join(", "))}. Compare the task results with care (tasks.json in each iteration).</p>` : ""}
@@ -390,16 +439,32 @@ ${scoreTable()
 </tbody></table></div>
 ${(fin.personas?.jurors || [])
   .filter((j) => j.ok)
-  .map((j) => `<details><summary>${esc(j.persona)} (${esc(j.provider)}): rationale${sameState ? "" : " after the changes"}</summary><p><strong>Pragmatic.</strong> ${esc(j.rationale?.pragmatic)}</p><p><strong>Hedonic.</strong> ${esc(j.rationale?.hedonic)}</p><p><strong>Visual.</strong> ${esc(j.rationale?.visual)}</p>${(j.top_issues || []).length ? `<ul>${j.top_issues.map((i) => `<li>[${esc(i.severity)}] ${esc(i.title)}: ${esc(i.evidence)}</li>`).join("")}</ul>` : ""}</details>`)
+  .map((j) => `<details><summary>${esc(j.persona)} (${esc(j.provider)}): rationale${sameState ? "" : " after the changes"}</summary><p><strong>Pragmatic.</strong> ${esc(j.rationale?.pragmatic)}</p><p><strong>Hedonic.</strong> ${esc(j.rationale?.hedonic)}</p>${j.rationale?.visual ? `<p><strong>Visual.</strong> ${esc(j.rationale.visual)}</p>` : ""}${(j.top_issues || []).length ? `<ul>${j.top_issues.map((i) => `<li>[${esc(i.severity)}] ${esc(i.title)}: ${esc(i.evidence)}</li>`).join("")}</ul>` : ""}</details>`)
   .join("\n")}
 
-<h2>Open findings (${remaining.length})</h2>
 ${
-  remaining.length
-    ? `<div class="panel"><table><thead><tr><th class="num">Severity</th><th>Finding</th><th>Framework</th><th>Suggested fix</th></tr></thead><tbody>${remaining
-        .map((f) => `<tr><td class="num">${esc(f.severity)}</td><td>${esc(f.title)}<br><span class="note">${esc(f.evidence)}</span></td><td>${esc(f.framework)}</td><td>${esc(f.fix)}</td></tr>`)
+  strengths.length
+    ? `<h2>What already works (${strengths.length})</h2><div class="panel"><ul>${strengths.map((s) => `<li>${esc(s)}</li>`).join("")}</ul></div>`
+    : ""
+}
+
+<h2>Open defects (${openDefects.length})</h2>
+${
+  openDefects.length
+    ? `<div class="panel"><table><thead><tr><th class="num">Severity</th><th>Defect</th><th>Framework</th><th>Suggested fix</th><th>Trade-off</th></tr></thead><tbody>${openDefects
+        .map((f) => `<tr><td class="num">${esc(f.severity)}</td><td>${esc(f.title)}<br><span class="note">${esc(f.evidence)}</span></td><td>${esc(f.framework)}</td><td>${esc(f.fix)}</td><td>${esc(f.tradeoff || "–")}</td></tr>`)
         .join("")}</tbody></table></div>`
-    : '<p class="note">No expert finding with severity 2 or higher is open.</p>'
+    : '<p class="note">No objective expert defect with severity 2 or higher is open.</p>'
+}
+
+<h2>Design suggestions (${openSuggestions.length})</h2>
+<p class="note">Subjective or single-expert suggestions. Weigh the trade-off against visual calm and density before applying.</p>
+${
+  openSuggestions.length
+    ? `<div class="panel"><table><thead><tr><th class="num">Severity</th><th>Suggestion</th><th>Framework</th><th>Proposed change</th><th>Trade-off</th></tr></thead><tbody>${openSuggestions
+        .map((f) => `<tr><td class="num">${esc(f.severity)}</td><td>${esc(f.title)}<br><span class="note">${esc(f.evidence)}</span></td><td>${esc(f.framework)}</td><td>${esc(f.fix)}</td><td>${esc(f.tradeoff || "–")}</td></tr>`)
+        .join("")}</tbody></table></div>`
+    : '<p class="note">No additional design suggestions with severity 2 or higher.</p>'
 }
 ${waivers.length ? `<h2>Waived findings (${waivers.length})</h2><div class="panel"><table><thead><tr><th>Finding</th><th>Reason</th></tr></thead><tbody>${waivers.map((w) => `<tr><td>${esc(w.title)}</td><td>${esc(w.reason)}</td></tr>`).join("")}</tbody></table></div>` : ""}
 
@@ -509,9 +574,20 @@ if (allChanges.length) {
   md.push("", "## Changes", "");
   for (const c of allChanges) md.push(`- **${c.id} ${c.title}**${c.before || c.after || c.aria ? ` ([image](changes/${c.id}.png))` : " (no image)"}${c.notes.length ? ` _${c.notes.join(" ")}_` : ""} (${c.iteration}): ${c.why || ""} ${[...(c.frameworks || [])].length ? `[${c.frameworks.join("; ")}]` : ""}${c.files?.length ? ` Files: ${c.files.join(", ")}` : ""}`);
 }
-if (remaining.length) {
-  md.push("", "## Open findings", "");
-  for (const f of remaining) md.push(`- [${f.severity}] ${f.title} (${f.framework})`);
+if (fin.pairwiseBaseline) {
+  md.push("", `Blind comparison vs. ${base.name}: ${fin.pairwiseBaseline.verdict} (after ${fin.pairwiseBaseline.tally.after}, original ${fin.pairwiseBaseline.tally.before}, tie ${fin.pairwiseBaseline.tally.tie}).`);
+}
+if (strengths.length) {
+  md.push("", "## What already works", "");
+  for (const s of strengths) md.push(`- ${s}`);
+}
+if (openDefects.length) {
+  md.push("", "## Open defects", "");
+  for (const f of openDefects) md.push(`- [${f.severity}] ${f.title} (${f.framework})${f.tradeoff ? ` — trade-off: ${f.tradeoff}` : ""}`);
+}
+if (openSuggestions.length) {
+  md.push("", "## Design suggestions", "");
+  for (const f of openSuggestions) md.push(`- [${f.severity}] ${f.title} (${f.framework})${f.tradeoff ? ` — trade-off: ${f.tradeoff}` : ""}`);
 }
 fs.writeFileSync(path.join(outDir, "summary.md"), md.join("\n") + "\n");
 outputs.summary = path.join(outDir, "summary.md");

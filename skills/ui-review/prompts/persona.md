@@ -23,7 +23,7 @@ You visited the page and tried to complete these tasks. The walkthrough log show
 
 ## How to answer
 
-1. First write your rationale: what helped you, what got in your way, what you noticed about the look and feel. Refer to concrete things you saw (text, buttons, colours, positions).
+1. First write your rationale: what helped you, what got in your way, and what stood out in your experience. Refer to concrete things you encountered (text, controls, structure, states, or visuals if shown).
 2. Then list the issues that bothered you most (at most 6), each with where it is and how badly it affected you (severity 0 = not a problem, 1 = cosmetic, 2 = minor, 3 = major, 4 = blocks the task).
 3. Then fill in the questionnaires below. Answer from your persona's point of view, based only on the evidence above.
 
@@ -34,9 +34,8 @@ You visited the page and tried to complete these tasks. The walkthrough log show
 Reply with exactly one JSON object and nothing else (no Markdown fence, no prose before or after). Keep the key order: rationale first.
 
 {
-  "rationale": { "pragmatic": "<2-4 sentences>", "hedonic": "<2-4 sentences>", "visual": "<2-4 sentences>" },
-  "top_issues": [ { "title": "<short>", "where": "<viewport + location or text>", "evidence": "<what you saw>", "severity": 0 } ],
+  "rationale": { {{rationale_keys}} },
+  "top_issues": [ { "title": "<short>", "where": "<viewport + location or text>", "evidence": "<what you observed>", "severity": 0 } ],
   "ueqs": { {{ueqs_keys}} },
-  "sus": { {{sus_keys}} },
-  "visawi": { {{visawi_keys}} }
+  "sus": { {{sus_keys}} }{{visawi_field}}
 }
