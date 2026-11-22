@@ -3,7 +3,7 @@
 //
 //   node jury.mjs personas --iter DIR [--config FILE] [--append]   (--append adds a repeat round)
 //   node jury.mjs experts  --iter DIR [--config FILE] [--waivers FILE]
-//   node jury.mjs pairwise --iter DIR --before DIR [--config FILE]
+//   node jury.mjs pairwise --iter DIR --before DIR [--config FILE] [--tag NAME]
 //   node jury.mjs providers                      # list usable providers
 //   --dry-run (any mode) writes the prompts to DIR/jury/raw/ without calling a juror CLI
 //
@@ -14,7 +14,7 @@ import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { parseArgs, loadConfig, readJSON, writeJSON, die, log, mean, round, SKILL_DIR } from "./lib/common.mjs";
-import { tilePng } from "./lib/images.mjs";
+import { tilePngInfo } from "./lib/images.mjs";
 
 const args = parseArgs();
 const mode = args._[0];
@@ -89,17 +89,23 @@ function taskImages(c, dir, limit) {
   return files.slice(0, limit);
 }
 
-function screenshotSet(dir, viewports, { tiles = 2 } = {}) {
-  const out = [];
+function screenshotSet(dir, viewports, { tiles = 2, dpr = 1 } = {}) {
+  const images = [];
+  const truncated = [];
   const tdir = path.join(dir, "jury", "tiles");
   for (const vp of viewports) {
     const fold = path.join(dir, `${vp}.png`);
-    if (fs.existsSync(fold)) out.push({ file: fold, label: `${vp}, first screen` });
-    tilePng(path.join(dir, `${vp}-full.png`), tdir, { tileHeight: vp === "mobile" ? 1400 : 1600, maxTiles: tiles }).forEach((f, i) =>
-      out.push({ file: f, label: `${vp}, full page part ${i + 1}` }),
-    );
+    if (fs.existsSync(fold)) images.push({ file: fold, label: `${vp}, first screen` });
+    const info = tilePngInfo(path.join(dir, `${vp}-full.png`), tdir, { tileHeight: (vp === "mobile" ? 1400 : 1600) * dpr, maxTiles: tiles });
+    info.files.forEach((f, i) => images.push({ file: f, label: `${vp}, full page part ${i + 1}${info.totalTiles > 1 ? ` of ${info.totalTiles}` : ""}` }));
+    if (info.truncated) truncated.push(`${vp} (first ${info.files.length} of ${info.totalTiles} sections)`);
   }
-  return out;
+  return { images, truncated };
+}
+
+function truncationNote(truncated) {
+  if (!truncated.length) return "";
+  return `\nNote: full-page screenshots were capped (${truncated.join("; ")}). Do not report elements further down the page (such as a footer or imprint) as missing.`;
 }
 
 // First screens of the extra views (tabs, panels) captured for the given viewports.
@@ -112,8 +118,15 @@ function viewShots(dir, viewports, label = "") {
 }
 
 const audienceText = () => cfg.jury.audience || "not stated; infer it from the page";
+const profileText = () => {
+  const p = cfg.profile || {};
+  const parts = [`kind: ${p.kind || "auto"}`, `density: ${p.density || "standard"}`];
+  if (p.notes) parts.push(`notes: ${p.notes}`);
+  return parts.join("; ");
+};
 
 function imageList(images, provider) {
+  if (!images.length) return "No screenshots provided (you navigate by screen reader and keyboard only).";
   if (PROVIDERS[provider].attach === "read")
     return "Open every image below with your Read tool before answering:\n" + images.map((im, i) => `${i + 1}. ${im.file} (${im.label})`).join("\n");
   return "The images are attached in this order:\n" + images.map((im, i) => `${i + 1}. ${path.basename(im.file)} (${im.label})`).join("\n");
@@ -138,7 +151,7 @@ function measurements(c) {
   if (m) {
     lines.push(`Mobile viewport meta: ${ck(m).metaViewport ?? "MISSING"}`);
     const st = ck(m).smallTargets;
-    if (st.length) lines.push(`Mobile targets under 44px: ${st.length} (under 24px: ${st.filter((t) => t.below24).length}), e.g. ${st.slice(0, 5).map((t) => `"${t.text}" ${t.width}x${t.height}`).join("; ")}`);
+    if (st.length) lines.push(`Mobile targets under 24px (WCAG 2.5.8, excluding inline links): ${st.length}, e.g. ${st.slice(0, 5).map((t) => `"${t.text}" ${t.width}x${t.height}`).join("; ")}`);
   }
   const small = ck(d)?.smallText || [];
   if (small.length) lines.push(`Text under 12px: ${small.slice(0, 6).map((t) => `"${t.text}" ${t.fontSize}`).join("; ")}`);
@@ -187,7 +200,7 @@ function shuffle(xs, rnd = Math.random) {
   return a;
 }
 
-function buildQuestionnaires() {
+function buildQuestionnaires({ includeVisawi = true } = {}) {
   const ueqs = shuffle(Q.ueqs.items).map((it) => ({ ...it, flipped: Math.random() < 0.5 }));
   const lines = [];
   lines.push("### Questionnaire 1 (UEQ-S)");
@@ -196,13 +209,15 @@ function buildQuestionnaires() {
   lines.push("\n### Questionnaire 2 (SUS)");
   lines.push("Rate each statement from 1 (strongly disagree) to 5 (strongly agree).");
   for (const it of Q.sus.items) lines.push(`- ${it.id}: ${it.text}`);
-  lines.push("\n### Questionnaire 3 (VisAWI-S)");
-  lines.push("Rate each statement about the visual design from 1 (strongly disagree) to 7 (strongly agree).");
-  for (const it of Q.visawi.items) lines.push(`- ${it.id}: ${it.text}`);
+  if (includeVisawi) {
+    lines.push("\n### Questionnaire 3 (VisAWI-S)");
+    lines.push("Rate each statement about the visual design from 1 (strongly disagree) to 7 (strongly agree).");
+    for (const it of Q.visawi.items) lines.push(`- ${it.id}: ${it.text}`);
+  }
   return { text: lines.join("\n"), ueqsLayout: ueqs.map(({ id, flipped }) => ({ id, flipped })) };
 }
 
-function scorePersona(answer, layout) {
+function scorePersona(answer, layout, { includeVisawi = true } = {}) {
   const num = (v) => (typeof v === "number" ? v : Number(v));
   const ue = {};
   for (const { id, flipped } of layout) {
@@ -217,14 +232,18 @@ function scorePersona(answer, layout) {
     if (!(v >= 1 && v <= 5)) throw new Error(`SUS item ${it.id} missing or out of range`);
     sus += it.positive ? v - 1 : 5 - v;
   }
-  const vis = Q.visawi.items.map((it) => num(answer.visawi?.[it.id]));
-  if (vis.some((v) => !(v >= 1 && v <= 7))) throw new Error("VisAWI-S item missing or out of range");
+  let visawi = null;
+  if (includeVisawi) {
+    const vis = Q.visawi.items.map((it) => num(answer.visawi?.[it.id]));
+    if (vis.some((v) => !(v >= 1 && v <= 7))) throw new Error("VisAWI-S item missing or out of range");
+    visawi = round(mean(vis));
+  }
   return {
     ueqsPragmatic: round(scaleMean("pragmatic")),
     ueqsHedonic: round(scaleMean("hedonic")),
     ueqsOverall: round(mean(Object.values(ue))),
     sus: sus * 2.5,
-    visawi: round(mean(vis)),
+    visawi,
     items: { ueqs: ue },
   };
 }
@@ -377,10 +396,16 @@ async function personas() {
   const file = path.join(juryDir, "personas.json");
   const previous = args.append ? readJSON(file, null) : null;
   const round_ = (previous?.rounds || 1) + (previous ? 1 : 0);
+  const dpr = capture.deviceScaleFactor || cfg.capture.deviceScaleFactor || 1;
   const jobs = pairs.map(([provider, persona]) => async () => {
-    const q = buildQuestionnaires();
-    const shots = [...screenshotSet(iterDir, [persona.viewport || "desktop"]), ...viewShots(iterDir, [persona.viewport || "desktop"]).slice(0, 2)];
-    const images = [...shots, ...taskImages(capture, iterDir, Math.max(0, cfg.jury.maxImages - shots.length))];
+    const visual = persona.visual !== false;
+    const q = buildQuestionnaires({ includeVisawi: visual });
+    let images = [];
+    if (visual) {
+      const set = screenshotSet(iterDir, [persona.viewport || "desktop"], { dpr });
+      const shots = [...set.images, ...viewShots(iterDir, [persona.viewport || "desktop"]).slice(0, 2)];
+      images = [...shots, ...taskImages(capture, iterDir, Math.max(0, cfg.jury.maxImages - shots.length))];
+    }
     const prompt = fill(template, {
       persona: cfg.jury.audience ? `${persona.description}\n\nThe site's audience: ${cfg.jury.audience}. You are one of them.` : persona.description,
       url: capture.url,
@@ -389,12 +414,15 @@ async function personas() {
       aria: persona.aria ? `## What your screen reader announced (accessibility tree)\n\n\`\`\`\n${aria(iterDir, 12000)}\n\`\`\`\n\nKeyboard focus walk: ${JSON.stringify(capture.summary)}` : "",
       images: "{{images_list}}",
       questionnaires: q.text,
+      rationale_keys: visual
+        ? '"pragmatic": "<2-4 sentences>", "hedonic": "<2-4 sentences>", "visual": "<2-4 sentences>"'
+        : '"pragmatic": "<2-4 sentences>", "hedonic": "<2-4 sentences>"',
       ueqs_keys: Q.ueqs.items.map((i) => `"${i.id}": 0`).join(", "),
       sus_keys: Q.sus.items.map((i) => `"${i.id}": 0`).join(", "),
-      visawi_keys: Q.visawi.items.map((i) => `"${i.id}": 0`).join(", "),
+      visawi_field: visual ? `,\n  "visawi": { ${Q.visawi.items.map((i) => `"${i.id}": 0`).join(", ")} }` : "",
     });
     const tag = `persona-${provider}-${persona.id}${round_ > 1 ? `-r${round_}` : ""}`;
-    const res = await ask(provider, prompt, images, tag, (a) => ({ scores: scorePersona(a, q.ueqsLayout) }));
+    const res = await ask(provider, prompt, images, tag, (a) => ({ scores: scorePersona(a, q.ueqsLayout, { includeVisawi: visual }) }));
     return { persona: persona.id, round: round_, ...res };
   });
   const advisory = new Set(cfg.jury.advisory || []);
@@ -404,10 +432,15 @@ async function personas() {
   // Advisory providers (default: opencode free models) are reported but do not count towards the gates.
   const okJ = jurors.filter((j) => j.ok && !j.advisory);
   // One value per juror (persona x provider): repeat rounds are averaged first, so a repeat
-  // stabilises each juror's rating instead of counting as extra jurors.
+  // stabilises each juror's rating instead of counting as extra jurors. Non-numeric values
+  // (such as visawi for a non-visual persona) are skipped.
   const perJuror = (k) => {
     const by = new Map();
-    for (const j of okJ) by.set(`${j.persona}|${j.provider}`, [...(by.get(`${j.persona}|${j.provider}`) || []), j.scores[k]]);
+    for (const j of okJ) {
+      const v = j.scores?.[k];
+      if (typeof v !== "number") continue;
+      by.set(`${j.persona}|${j.provider}`, [...(by.get(`${j.persona}|${j.provider}`) || []), v]);
+    }
     return [...by.values()].map((xs) => mean(xs));
   };
   const aggregate = {
@@ -435,12 +468,15 @@ async function experts() {
   const checklist = fs.readFileSync(path.join(SKILL_DIR, "references/expert-checklist.md"), "utf8");
   const waivers = args.waivers && fs.existsSync(args.waivers) ? readJSON(args.waivers, []) : [];
   const who = cfg.jury.experts === "all" ? providers : providers.slice(0, Number(cfg.jury.experts) || 1);
-  const images = [...screenshotSet(iterDir, Object.keys(cfg.viewports), { tiles: 2 })];
+  const dpr = capture.deviceScaleFactor || cfg.capture.deviceScaleFactor || 1;
+  const set = screenshotSet(iterDir, Object.keys(cfg.viewports), { tiles: 2, dpr });
+  const images = [...set.images];
   if (fs.existsSync(path.join(iterDir, "reflow-320.png"))) images.push({ file: path.join(iterDir, "reflow-320.png"), label: "320 CSS px wide (400 % zoom)" });
   if (fs.existsSync(path.join(iterDir, "desktop-dark.png"))) images.push({ file: path.join(iterDir, "desktop-dark.png"), label: "desktop, dark colour scheme" });
   images.push(...viewShots(iterDir, Object.keys(cfg.viewports)).slice(0, 3));
   const prompt = fill(template, {
     audience: audienceText(),
+    profile: profileText(),
     url: capture.url,
     title: capture.viewports.desktop?.checks.title ?? "",
     stack: (capture.stack?.detected || []).map((s) => s.name).join(", ") || "none detected (static HTML?)",
@@ -448,6 +484,7 @@ async function experts() {
     tasks: taskLog(capture, iterDir),
     aria: aria(iterDir, 15000),
     images: "{{images_list}}",
+    screenshot_note: truncationNote(set.truncated),
     checklist,
     design_system: designSystemGuidance(capture),
     waivers: waivers.length
@@ -462,13 +499,34 @@ async function experts() {
   );
   const reviews = await pool(jobs, cfg.jury.concurrency);
   const advisory = new Set(cfg.jury.advisory || []);
-  const findings = reviews.flatMap((r) => (r.ok ? r.answer.findings.map((f) => ({ ...f, severity: Number(f.severity) || 0, source: r.provider, advisory: advisory.has(r.provider) })) : []));
+  const findings = reviews.flatMap((r) =>
+    r.ok
+      ? r.answer.findings.map((f) => ({
+          ...f,
+          kind: f.kind === "defect" || f.kind === "suggestion" ? f.kind : null,
+          tradeoff: f.tradeoff || "",
+          severity: Number(f.severity) || 0,
+          source: r.provider,
+          advisory: advisory.has(r.provider),
+        }))
+      : [],
+  );
   findings.sort((a, b) => b.severity - a.severity);
   findings.forEach((f, i) => (f.id = `F${i + 1}`));
   const out = {
     mode: "experts",
     ranAt: new Date().toISOString(),
-    reviews: reviews.map((r) => ({ provider: r.provider, model: r.model, verified: r.verified, ok: r.ok, error: r.error, seconds: r.seconds, strengths: r.answer?.strengths, count: r.answer?.findings?.length })),
+    reviews: reviews.map((r) => ({
+      provider: r.provider,
+      model: r.model,
+      verified: r.verified,
+      advisory: advisory.has(r.provider),
+      ok: r.ok,
+      error: r.error,
+      seconds: r.seconds,
+      strengths: Array.isArray(r.answer?.strengths) ? r.answer.strengths : [],
+      count: r.answer?.findings?.length,
+    })),
     findings,
   };
   writeJSON(path.join(juryDir, "experts.json"), out);
@@ -480,33 +538,31 @@ async function pairwise() {
   if (!args.before) die("--before DIR is required for pairwise");
   const beforeDir = path.resolve(args.before);
   const template = fs.readFileSync(path.join(SKILL_DIR, "prompts/pairwise.md"), "utf8");
-  // Crops of the changed elements from this iteration's plan. The before crop shows the
-  // previous version, the after crop this one. Labels stay neutral (no change titles).
-  const crops = readJSON(path.join(iterDir, "crops", "crops.json"), []);
-  const detailIds = [...new Set(crops.filter((c) => c.ok && c.used !== "viewport").map((c) => c.id))]
-    .filter((id) => ["before", "after"].every((ph) => crops.some((c) => c.id === id && c.phase === ph && c.ok)))
-    .slice(0, 3);
-  // Same order and count in both versions, so the models compare like with like.
-  const shotsFor = (dir, label, side) => {
+  const tagSuffix = args.tag ? `-${String(args.tag).replace(/[^a-zA-Z0-9_-]/g, "")}` : "";
+  const maxImages = cfg.jury.maxImagesPairwise || 16;
+  const perSide = Math.max(1, Math.floor(maxImages / 2));
+  // Same order and symmetric count in both versions, so both sides are compared fairly
+  // without detail crops spotlighting local patches over overall visual harmony.
+  const shotsFor = (dir, label) => {
+    const c = readJSON(path.join(dir, "capture.json"), {});
+    const dpr = c.deviceScaleFactor || cfg.capture.deviceScaleFactor || 1;
     const set = [];
+    const truncated = [];
     for (const vp of Object.keys(cfg.viewports)) {
       const f = path.join(dir, `${vp}.png`);
       if (fs.existsSync(f)) set.push({ file: f, label: `version ${label}, ${vp}, first screen` });
     }
     for (const vp of Object.keys(cfg.viewports)) {
-      const tiles = tilePng(path.join(dir, `${vp}-full.png`), path.join(dir, "jury", "tiles"), { tileHeight: vp === "mobile" ? 1400 : 1600, maxTiles: 2 });
-      tiles.forEach((f, i) => set.push({ file: f, label: `version ${label}, ${vp}, full page part ${i + 1}` }));
+      const info = tilePngInfo(path.join(dir, `${vp}-full.png`), path.join(dir, "jury", "tiles"), { tileHeight: (vp === "mobile" ? 1400 : 1600) * dpr, maxTiles: 1 });
+      info.files.forEach((f, i) => set.push({ file: f, label: `version ${label}, ${vp}, full page part ${i + 1}${info.totalTiles > 1 ? ` of ${info.totalTiles}` : ""}` }));
+      if (info.truncated) truncated.push(`${vp} (first ${info.files.length} of ${info.totalTiles} sections)`);
     }
     const reflow = path.join(dir, "reflow-320.png");
     if (fs.existsSync(reflow)) set.push({ file: reflow, label: `version ${label}, 320 CSS px` });
     set.push(...viewShots(dir, Object.keys(cfg.viewports), `version ${label}, `).slice(0, 2));
-    detailIds.forEach((id, i) => {
-      const f = path.join(iterDir, "crops", `${id}-${side}.png`);
-      if (fs.existsSync(f)) set.push({ file: f, label: `version ${label}, detail ${i + 1}` });
-    });
-    return set;
+    return { images: set.slice(0, perSide), truncated };
   };
-  // File names and folders would reveal the versions (iter-3/..., C2.1-before.png), and Claude
+  // File names and folders would reveal the versions (iter-3/..., etc.), and Claude
   // sees full paths, Codex the file names. So every image is copied to a neutral name in a
   // folder with a random name: A-01.png, B-01.png ...
   const blindCopies = (images) => {
@@ -524,19 +580,29 @@ async function pairwise() {
   const jobs = providers.flatMap((provider) =>
     orders.map((order) => async () => {
       const [aDir, bDir] = order === "before-first" ? [beforeDir, iterDir] : [iterDir, beforeDir];
-      const [aSide, bSide] = order === "before-first" ? ["before", "after"] : ["after", "before"];
-      const images = blindCopies([...shotsFor(aDir, "A", aSide), ...shotsFor(bDir, "B", bSide)]);
-      const prompt = fill(template, { url: capture.url, purpose: capture.viewports.desktop?.checks.title ?? "", audience: audienceText(), images: "{{images_list}}" });
+      const shotsA = shotsFor(aDir, "A");
+      const shotsB = shotsFor(bDir, "B");
+      const limit = Math.min(shotsA.images.length, shotsB.images.length);
+      const images = blindCopies([...shotsA.images.slice(0, limit), ...shotsB.images.slice(0, limit)]);
+      const truncated = [...new Set([...shotsA.truncated, ...shotsB.truncated])];
+      const prompt = fill(template, {
+        url: capture.url,
+        purpose: capture.viewports.desktop?.checks.title ?? "",
+        audience: audienceText(),
+        profile: profileText(),
+        images: "{{images_list}}",
+        screenshot_note: truncationNote(truncated),
+      });
       const res = await ask(
         provider,
         prompt,
         images,
-        `pairwise-${provider}-${order}`,
+        `pairwise${tagSuffix}-${provider}-${order}`,
         (a) => {
           if (!["A", "B", "tie"].includes(a.winner)) throw new Error("winner must be A, B or tie");
           return {};
         },
-        cfg.jury.maxImagesPairwise || cfg.jury.maxImages * 2,
+        limit * 2,
       );
       if (!res.ok) return { provider, order, ok: false, error: res.error };
       const unblind = (w) => (w === "tie" ? "tie" : (w === "A") === (order === "before-first") ? "before" : "after");
@@ -550,10 +616,39 @@ async function pairwise() {
   votes.forEach((v) => (v.advisory = advisory.has(v.provider)));
   const ok = votes.filter((v) => v.ok && !v.advisory);
   const count = (w) => ok.filter((v) => v.winner === w).length;
-  const verdict = !ok.length ? "unknown" : count("before") > count("after") ? "before" : count("after") > count("before") && count("before") === 0 ? "after" : count("after") > count("before") ? "after-mixed" : "tie";
-  const out = { mode: "pairwise", ranAt: new Date().toISOString(), before: beforeDir, after: iterDir, votes, tally: { after: count("after"), before: count("before"), tie: count("tie"), failed: votes.length - ok.length }, verdict };
-  writeJSON(path.join(juryDir, "pairwise.json"), out);
-  console.log(JSON.stringify({ tally: out.tally, verdict, votes: ok.map((v) => ({ provider: v.provider, order: v.order, winner: v.winner, confidence: v.confidence })) }, null, 2));
+  const byProvider = new Map();
+  for (const v of ok) {
+    const rec = byProvider.get(v.provider) || { after: 0, before: 0, tie: 0 };
+    if (v.winner === "after" || v.winner === "before" || v.winner === "tie") rec[v.winner]++;
+    byProvider.set(v.provider, rec);
+  }
+  const providerSummary = Object.fromEntries(byProvider);
+  const providerAgainst = [...byProvider.entries()].filter(([, r]) => r.before > r.after).map(([p]) => p);
+  const verdict = !ok.length
+    ? "unknown"
+    : count("before") > count("after")
+      ? "before"
+      : providerAgainst.length > 0
+        ? "contested"
+        : count("after") > count("before") && count("before") === 0
+          ? "after"
+          : count("after") > count("before")
+            ? "after-mixed"
+            : "tie";
+  const out = {
+    mode: "pairwise",
+    tag: args.tag || null,
+    ranAt: new Date().toISOString(),
+    before: beforeDir,
+    after: iterDir,
+    votes,
+    tally: { after: count("after"), before: count("before"), tie: count("tie"), failed: votes.length - ok.length },
+    providerSummary,
+    providerAgainst,
+    verdict,
+  };
+  writeJSON(path.join(juryDir, `pairwise${tagSuffix}.json`), out);
+  console.log(JSON.stringify({ tally: out.tally, providerSummary, providerAgainst, verdict, votes: ok.map((v) => ({ provider: v.provider, order: v.order, winner: v.winner, confidence: v.confidence })) }, null, 2));
 }
 
 if (mode === "personas") await personas();

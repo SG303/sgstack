@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - `council` uses fixed default members from `skills/council/members.md` (Claude Code Opus 5.5, Codex GPT Sol 6.2 and Antigravity Gemini Neon, each at high effort) instead of picking models at run time.
+- `ui-review` now separates objective defects from subjective design suggestions (with explicit trade-offs and preserved strengths), adds a product `profile` (`kind`, `density`, `notes`) to avoid checklist bloat on apps/tools, keeps `ueqs-hedonic` and `visawi` diagnostic by default, excludes the blind screen-reader persona from screenshots and VisAWI-S, requires cross-provider consensus for subjective severity-3 expert findings, tightens blind A/B regression guarding (`contested` verdict, `restraint` dimension, symmetric image budget, baseline check against `iter-0`), and fixes probe false positives (roving tabindex, `:focus-within`/pseudo-element focus rings, prose-only readability, text-length check on long lines, WCAG 2.5.8 24px non-inline mobile targets, 2x screenshot DPI and truncated-tile notices) plus report round-averaging.
 - `yolo` treats a referenced issue's acceptance criteria and verification steps as the definition of done, and `cpm` links the implemented issue with `Closes #<number>`.
 - The global commit identity rule now applies to GitHub; agents keep the git identity a repo or host is configured with elsewhere.
 - `cpm` now completes the repo's established GitHub release process after merging; repos without releases are unaffected.

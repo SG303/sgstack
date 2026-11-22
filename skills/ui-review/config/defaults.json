@@ -1,5 +1,10 @@
 {
   "mode": "audit",
+  "profile": {
+    "kind": "auto",
+    "density": "standard",
+    "notes": ""
+  },
   "maxIterations": 4,
   "maxChangesPerIteration": 8,
   "viewports": {
@@ -18,6 +23,7 @@
     "maxFullPageHeight": 8000,
     "focusStops": 40,
     "settleMs": 1200,
+    "deviceScaleFactor": 2,
     "darkMode": "auto",
     "views": []
   },
@@ -47,12 +53,13 @@
       "successRate": 1
     },
     "experts": {
-      "maxSeverity": 2
+      "maxSeverity": 2,
+      "requireConsensus": true
     },
     "deceptivePatterns": 0,
     "ueqs": {
       "pragmaticMean": 1.5,
-      "hedonicMean": 0.8,
+      "hedonicMean": null,
       "minJuror": 0.8
     },
     "sus": {
@@ -60,10 +67,11 @@
       "minJuror": 68
     },
     "visawi": {
-      "mean": 5
+      "mean": null
     },
     "pairwise": {
-      "requireWinOrTie": true
+      "requireWinOrTie": true,
+      "requireNoProviderAgainst": true
     }
   },
   "jury": {
@@ -81,7 +89,8 @@
         "id": "keyboard-screenreader",
         "description": "Blind user who navigates with a screen reader and keyboard only. Judges the site from the accessibility tree, focus order and the task walkthrough, not from visual polish.",
         "viewport": "desktop",
-        "aria": true
+        "aria": true,
+        "visual": false
       },
       {
         "id": "returning-power-user",
@@ -108,6 +117,6 @@
     "advisory": [
       "opencode"
     ],
-    "maxImagesPairwise": 24
+    "maxImagesPairwise": 16
   }
 }

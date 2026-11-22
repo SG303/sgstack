@@ -32,9 +32,10 @@ Ask only if the target cannot be found or started. Everything else has a default
    - Set `"mode"` to the mode authorized by the current request. A project config cannot authorize `fix` for a review-only request.
    - "all agents at least 1.5 UEQ" → `{"gates":{"ueqs":{"pragmaticMean":1.5,"hedonicMean":1.5,"minJuror":1.5}}}`
    - "max 3 iterations" → `{"maxIterations":3}`
+   - "compact dashboard" / "marketing landing page" → `{"profile":{"kind":"app","density":"compact","notes":"..."}}` (`kind`: `app`, `marketing`, `content`; `density`: `compact`, `standard`, `spacious`).
    - Juror models are pinned in `jury.models` (Claude `claude-opus-5-5`, Codex `gpt-6.1-sol`) with `jury.effort` `high`, so scores stay comparable across runs. "use Sonnet as Claude juror" → `{"jury":{"models":{"claude":"claude-sonnet-5-5"}}}`. Changing models makes scores incomparable with earlier runs; say so in the report.
    - "include OpenCode" → `{"jury":{"opencode":true}}`. OpenCode free models are advisory: they are shown but not counted, because in calibration they rated a broken page as good. To make them count, also set `"advisory":[]`.
-   - "only accessibility" → `{"gates":{"ueqs":{"pragmaticMean":-3,"hedonicMean":-3,"minJuror":-3},"sus":{"mean":0,"minJuror":0},"visawi":{"mean":1}}}`.
+   - "only accessibility" → `{"gates":{"ueqs":{"pragmaticMean":null,"hedonicMean":null,"minJuror":null},"sus":{"mean":null,"minJuror":null},"visawi":{"mean":null}}}`.
    Pass `--config $RUN/config.json` to every script call below.
 5. Write `$RUN/run.json`: `{"url", "mode", "startedAt", "request": "<the user's words>", "server": "<command or null>"}`.
 6. If the run lives in a temporary worktree, tell the user in the final answer that `.ui-review/` (and the report) disappears with the worktree.
@@ -43,8 +44,9 @@ Ask only if the target cannot be found or started. Everything else has a default
 
 1. `node S/scripts/capture.mjs capture --url URL --out $RUN/iter-0 --config $RUN/config.json`
    This captures screenshots (desktop and mobile, first screen and full page, 320 px reflow, dark mode if the CSS supports it), the accessibility tree, axe-core, lab Web Vitals, the keyboard focus walk, page checks and the runtime stack. It prints a summary.
-2. Look at `iter-0/desktop.png`, `iter-0/mobile.png` and `iter-0/aria-desktop.txt`, and read the README or spec if there is one. Then add to `$RUN/config.json` (both are listed in the report, so the user can correct them):
+2. Look at `iter-0/desktop.png`, `iter-0/mobile.png` and `iter-0/aria-desktop.txt`, and read the README or spec if there is one. Then add to `$RUN/config.json` (listed in the report, so the user can correct them):
    - `jury.audience`: who the site is for, in one sentence from the README, spec or page ("network engineers sizing switch uplinks and WLAN"). The personas become members of that audience; without it they judge a specialist tool like a general consumer site.
+   - `profile`: `{"kind": "app|marketing|content", "density": "compact|standard|spacious", "notes": "<brief design intent to preserve>"}` so reviewers and the fixer respect the UI's purpose and visual restraint instead of imposing landing-page norms on a dense tool.
    - `capture.views`: UI states that the first page load does not show but that matter (other tabs, an opened accordion, a second wizard step), as `{"id": "wlan", "label": "WLAN tab", "viewport": "both", "steps": [{"action": "click", "any": [{"role": "tab", "name": "WLAN"}]}]}`. They are captured for the report, the experts and the blind comparison.
    Write `$RUN/tasks.json` with the 2-4 core tasks a visitor comes for (see "Task format" below). Then run `capture.mjs capture --url URL --out $RUN/iter-0 --tasks $RUN/tasks.json --only tasks,views --config $RUN/config.json`.
 3. Run both juries. They are independent of each other, so run them in parallel:
@@ -63,24 +65,26 @@ Repeat until one of these holds. For iteration `i` with previous iteration `p = 
 - All gates pass (borderline passes confirmed as in step 7).
 - `maxIterations` is reached.
 - Plateau: two iterations in a row bring no gate improvement. A questionnaire gate that flips while `borderline` is noise, not an improvement.
-- Only questionnaire gates fail (`gates.json` `onlyPerceptionFails`) and the worklist has no item with priority 2 or higher. Further gains then need a deliberate redesign or owner input, not more fixes; say so in the report.
+- Only questionnaire gates fail (`gates.json` `onlyPerceptionFails`) and `worklist.json` has no `defects` left (`openDefectCount === 0`). Further gains then need a deliberate redesign or owner input, not more fixes; say so in the report.
 
-1. **Plan from the worklist only.** Read `$RUN/iter-p/worklist.json` and `gates.json`. The worklist holds concrete problems from axe-core, the probes, the task walkthroughs, the expert reviews, the personas' issues and the blind comparison. Do not read the questionnaires, the jurors' prompts or their individual scores, and do not tune copy or visuals towards rating words ("easy", "efficient", "inventive"). Fix the problems and the ratings follow. Optimising for the score instead of the user is the failure mode this setup guards against.
+1. **Plan from the worklist only.** Read `$RUN/iter-p/worklist.json` (`strengths`, `defects`, `suggestions`) and `gates.json`. Do not read the questionnaires, the jurors' prompts or their individual scores, and do not tune copy or visuals towards rating words ("easy", "efficient", "inventive"). Fix real problems and the ratings follow. Optimising for the score instead of the user is the failure mode this setup guards against.
+   - Read `strengths` first and treat them as guardrails: do not break what already works (visual calm, hierarchy, density, brand feel).
    - Merge duplicate items (several jurors often report the same problem).
+   - Work through `defects` first. Treat `suggestions` critically using each item's `tradeoff`: prefer subtraction and refinement over adding chrome, helper text, borders or banners, and skip any suggestion that makes the UI busier or breaks its `profile` (`kind`, `density`).
    - The item "Persona notes (context)" is not a defect list. Take only concrete, observable problems from it (cut-off text, a result that is hard to find, a confusing label) and ignore judgements of taste.
    - Before changing something an earlier iteration changed on purpose, check the earlier worklists. If a new finding conflicts with an earlier one (for example "the bar is too tall" against "the bar needs its text label"), find a solution that satisfies both, or keep the earlier fix and waive the new finding with the reason.
-   - Priority: failed tasks and severity 4 first, then axe critical/serious, deceptive patterns, keyboard and focus, reflow, then severity 3, Web Vitals, then the rest.
+   - Priority: failed tasks and severity 4 defects first, then axe critical/serious, deceptive patterns, keyboard and focus, reflow, corroborated severity 3 defects, Web Vitals, then vetted suggestions only if they clearly improve the UI without adding clutter.
    - Pick at most `maxChangesPerIteration` (default 8) changes so the diff stays reviewable.
-   - A finding you consider wrong (for example a deliberate brand decision): do not fix it. Add `{"title", "match": "<regex on the finding title>", "reason"}` to `$RUN/waivers.json`. Waivers are listed in the report for the user to judge; use them sparingly.
-2. **Write the plan** to `$RUN/iter-i/changes.json`, an array of `{"id": "C<i>.<n>", "title", "why", "frameworks": ["WCAG 2.2 SC 2.4.7", "Nielsen H4"], "findings": ["F3"], "selector": "<CSS selector of the affected element, or null for global changes>", "viewport": "desktop|mobile"}`. The user judges every change from its before/after crop, so make each one show the change:
+   - A finding you consider wrong (for example a deliberate brand or density decision): do not fix it. Add `{"title", "match": "<regex on the finding title>", "reason"}` to `$RUN/waivers.json`. Waivers suppress matching findings from both experts and personas and are listed in the report for the user to judge; use them sparingly.
+2. **Write the plan** to `$RUN/iter-i/changes.json`, an array of `{"id": "C<i>.<n>", "title", "why", "frameworks": ["WCAG 2.2 SC 2.4.7", "Nielsen H4"], "findings": ["F3"], "selector": "<CSS selector of the affected element, or null for global changes>", "viewport": "desktop|mobile"}`. Crops are only for verification—never exaggerate or bloat a change just to make a crop look visibly different. For each change that has a visual or accessibility effect, configure the crop so it shows the affected element:
    - `"width": 320` when the change only applies below a breakpoint that the desktop and mobile viewports do not reach.
    - `"setup": [<task steps>]` when the change needs a state: `{"action": "press", "key": "Tab"}` for a focus ring, `{"action": "click", ...}` for an undo bar or an open menu, `{"action": "scroll", "y": 0}`.
    - `"anchor": "<selector>"` for a new element: the before crop shows that area instead.
    - Changes to names, roles or live regions show up as an accessibility-tree diff next to the crops; still give their `selector`.
    Then crop the current state:
    `node S/scripts/capture.mjs crop --url URL --plan $RUN/iter-i/changes.json --phase before --out $RUN/iter-i/crops --config $RUN/config.json`
-3. **Edit the code.** Before the first edit, read the sections of `S/references/design-systems.md` that match the detected stack, and follow the project's own conventions (`AGENTS.md`, `CLAUDE.md`, existing components and tokens). Fix at the source: theme tokens, shared components and templates, never generated output or one-off overrides. For visual redesign work, also use a frontend design skill if one is installed (for example `frontend-design`). Keep content and features; never remove functionality to pass a gate.
-4. Add `"what"` (one sentence: what changed) and `"files"` to every entry in `changes.json`. If a selector changed, update it so the after-crop finds the element. After the after-crop (step 6), check `crops/crops.json` and open the images: a failed crop, a fallback to the first screen or two identical images mean the user cannot judge the change. Fix the plan entry (`setup`, `width`, `anchor`) and crop the after phase again. The before phase cannot be retaken once the code changed, so think about `setup`, `width` and `anchor` before the first edit.
+3. **Edit the code.** Before the first edit, read the sections of `S/references/design-systems.md` that match the detected stack, and follow the project's own conventions (`AGENTS.md`, `CLAUDE.md`, existing components and tokens). Fix at the source: theme tokens, shared components and templates, never generated output or one-off overrides. Preserve the product's existing aesthetic language and density; if a dedicated frontend design skill is installed in your harness, use it for visual redesign work. Keep content and features; never remove functionality to pass a gate.
+4. Add `"what"` (one sentence: what changed) and `"files"` to every entry in `changes.json`. If a selector changed, update it so the after-crop finds the element. After the after-crop (step 6), check `crops/crops.json` and open the images (as well as the full-page `desktop.png` and `mobile.png` to verify overall visual cohesion): a failed crop or a fallback to the first screen means the user cannot judge the change. Fix the plan entry (`setup`, `width`, `anchor`) and crop the after phase again. The before phase cannot be retaken once the code changed, so think about `setup`, `width` and `anchor` before the first edit.
 5. If the project has a quick check (type check, lint, unit tests), run it and fix what you broke. With a preview build (not a dev server), rebuild.
 6. **Measure again.** Run the full capture with tasks into `$RUN/iter-i` (step 2.1 with `--tasks $RUN/tasks.json`). If visible labels changed, add alternatives to the task's `any` lists. Never remove or loosen an `expect`, and never change a task's goal. If a task was wrong (a locator artefact), fix it during the baseline, before the juries run; later corrections are recorded in `$RUN/run.json` under `"taskChanges"` with the reason. Each iteration keeps a copy of the tasks it ran (`iter-i/tasks.json`), and the report flags differences to the baseline. Then:
    `node S/scripts/capture.mjs crop --url URL --plan $RUN/iter-i/changes.json --phase after --out $RUN/iter-i/crops --config $RUN/config.json`
@@ -88,9 +92,12 @@ Repeat until one of these holds. For iteration `i` with previous iteration `p = 
 7. **Judge again.** Run experts, personas and the blind pairwise comparison in parallel, then the gates:
    `node S/scripts/jury.mjs pairwise --iter $RUN/iter-i --before $RUN/iter-p --config $RUN/config.json`
    `node S/scripts/gates.mjs --iter $RUN/iter-i --config $RUN/config.json --waivers $RUN/waivers.json`
-   The blind comparison sees both versions on desktop and mobile (first screen and full page), at 320 px, the configured views and up to three crops of changed elements.
+   The blind comparison sees both versions symmetrically on desktop and mobile (first screen and full page), at 320 px and in the configured views, without detail crops that spotlight isolated patches.
    If `gates.json` lists `borderline` gates and the decision depends on them (final iteration, or the only reason to continue), repeat the personas once and evaluate again: `node S/scripts/jury.mjs personas --iter $RUN/iter-i --config $RUN/config.json --append`, then `gates.mjs`. Each juror's rounds are averaged. Do not repeat more than once per iteration.
-8. **Regression guard.** If the pairwise verdict is `before` (the jurors prefer the previous version), revert this iteration with `git apply -R $RUN/iter-i/changes.patch`. Record it in `$RUN/run.json` under `"reverted"` and plan a different approach. The final state is then the last iteration that was not reverted.
+8. **Regression guard.** If the pairwise verdict is `before` or `contested` (any non-advisory provider net-prefers the previous version), revert this iteration with `git apply -R $RUN/iter-i/changes.patch`. Record it in `$RUN/run.json` under `"reverted"` and plan a different approach. The final state is then the last iteration that was not reverted.
+9. **Baseline drift check.** When the loop finishes with more than one kept iteration (`final > 1`), run one final blind comparison against `iter-0` before generating the report:
+   `node S/scripts/jury.mjs pairwise --iter $RUN/iter-final --before $RUN/iter-0 --tag baseline --config $RUN/config.json`
+   If the verdict against `iter-0` is `before` or `contested`, flag it prominently in the final answer so the user does not accept cumulative drift.
 
 Tell the user briefly after each iteration: gates passed before and after, what changed, what comes next.
 
@@ -147,11 +154,11 @@ Safety: on a site that is not a local or staging instance, tasks must not submit
 | Reflow at 320 px, visible and unobscured focus, keyboard-reachable click targets | pass |
 | LCP / CLS / TBT (lab, mobile profile) / INP (tasks) | 2500 ms / 0.1 / 200 ms / 200 ms |
 | Tasks completed | 100 % |
-| Highest expert severity (Nielsen 0-4), deceptive patterns | at most 2, none |
-| UEQ-S pragmatic / hedonic mean, lowest juror overall | 1.5 / 0.8 / 0.8 |
+| Highest expert severity (Nielsen 0-4), deceptive patterns | corroborated ≤ 2 (sev 4 defects always block), none |
+| UEQ-S pragmatic mean / lowest juror (hedonic diagnostic by default) | 1.5 / 0.8 |
 | SUS mean / lowest juror | 80 / 68 |
-| VisAWI-S mean | 5.0 |
-| Blind A/B against the previous iteration | not worse |
+| VisAWI-S mean (sighted personas only) | diagnostic by default (set `gates.visawi.mean` to enforce) |
+| Blind A/B against previous iteration (and final vs. `iter-0`) | not worse and uncontested (no provider net-against) |
 
 ## Rules
 

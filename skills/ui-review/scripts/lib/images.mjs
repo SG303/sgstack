@@ -13,12 +13,13 @@ export function writePng(file, png) {
 }
 
 // Splits a tall screenshot into tiles so vision models do not downscale it into mush.
-// Returns the written tile paths (cached: existing tiles are reused).
-export function tilePng(src, outDir, { tileHeight = 1600, maxTiles = 3 } = {}) {
-  if (!fs.existsSync(src)) return [];
+// Returns { files, totalTiles, truncated } (cached: existing tiles are reused).
+export function tilePngInfo(src, outDir, { tileHeight = 1600, maxTiles = 3 } = {}) {
+  if (!fs.existsSync(src)) return { files: [], totalTiles: 0, truncated: false };
   const base = path.basename(src, ".png");
   const img = readPng(src);
-  const count = Math.min(maxTiles, Math.ceil(img.height / tileHeight));
+  const totalTiles = Math.max(1, Math.ceil(img.height / tileHeight));
+  const count = Math.min(maxTiles, totalTiles);
   const files = [];
   for (let i = 0; i < count; i++) {
     const file = path.join(outDir, `${base}-tile${i + 1}.png`);
@@ -29,7 +30,11 @@ export function tilePng(src, outDir, { tileHeight = 1600, maxTiles = 3 } = {}) {
     PNG.bitblt(img, tile, 0, i * tileHeight, img.width, h, 0, 0);
     writePng(file, tile);
   }
-  return files;
+  return { files, totalTiles, truncated: totalTiles > count };
+}
+
+export function tilePng(src, outDir, opts) {
+  return tilePngInfo(src, outDir, opts).files;
 }
 
 // Pads a PNG to the given size with a solid colour (default white).

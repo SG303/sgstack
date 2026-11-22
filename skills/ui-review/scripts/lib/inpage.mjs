@@ -104,7 +104,7 @@ export function pageChecks({ isMobile }) {
     .slice(0, 15)
     .map((el) => ({ selector: sel(el), fontSize: getComputedStyle(el).fontSize, text: textOf(el).slice(0, 60) }));
   const longLines = [...document.querySelectorAll("p")]
-    .filter(visible)
+    .filter((el) => visible(el) && textOf(el).length > 90)
     .map((el) => {
       const cs = getComputedStyle(el);
       const chars = Math.round(el.getBoundingClientRect().width / (parseFloat(cs.fontSize) * 0.5));
@@ -113,23 +113,30 @@ export function pageChecks({ isMobile }) {
     .filter((x) => x.approxCharsPerLine > 90)
     .slice(0, 10);
 
-  // Touch targets (mobile): WCAG 2.5.8 minimum is 24px, platform guidelines ask for 44-48px.
+  // Touch targets (mobile): WCAG 2.5.8 minimum is 24px (excluding inline links in text).
+  const isInlineTextLink = (el) => el.tagName === "A" && getComputedStyle(el).display === "inline" && !!el.closest("p, li, dd, td, figcaption, blockquote");
   const interactive = [...document.querySelectorAll('a[href], button, input:not([type=hidden]), select, textarea, [role=button], [role=link], [tabindex]:not([tabindex="-1"])')].filter(visible);
   const smallTargets = isMobile
     ? interactive
+        .filter((el) => !isInlineTextLink(el))
         .map((el) => ({ el, r: el.getBoundingClientRect() }))
-        .filter(({ r }) => r.width < 44 || r.height < 44)
+        .filter(({ r }) => r.width < 24 || r.height < 24)
         .slice(0, 25)
-        .map(({ el, r }) => ({ selector: sel(el), width: Math.round(r.width), height: Math.round(r.height), below24: r.width < 24 || r.height < 24, text: textOf(el).slice(0, 40) }))
+        .map(({ el, r }) => ({ selector: sel(el), width: Math.round(r.width), height: Math.round(r.height), below24: true, text: textOf(el).slice(0, 40) }))
     : [];
 
   // Elements that look clickable but cannot be reached with the keyboard.
   const natural = new Set(["A", "BUTTON", "INPUT", "SELECT", "TEXTAREA", "SUMMARY", "LABEL", "OPTION"]);
+  const rovingRoles = new Set(["tab", "menuitem", "menuitemcheckbox", "menuitemradio", "option", "radio", "treeitem", "gridcell"]);
+  const rovingContainers = '[role="tablist"], [role="menu"], [role="menubar"], [role="listbox"], [role="radiogroup"], [role="tree"], [role="grid"]';
   const clickableNotFocusable = [...document.querySelectorAll("body *")]
     .filter((el) => {
       if (natural.has(el.tagName) || el.closest("a, button, label, summary")) return false;
       if (el.tabIndex >= 0) return false;
-      const handler = el.hasAttribute("onclick") || el.getAttribute("role") === "button";
+      const role = (el.getAttribute("role") || "").toLowerCase();
+      // WAI-ARIA composite widgets use roving tabindex="-1" on inactive items (arrow-key reachable).
+      if (el.getAttribute("tabindex") === "-1" && (rovingRoles.has(role) || !!el.closest(rovingContainers))) return false;
+      const handler = el.hasAttribute("onclick") || role === "button";
       const pointer = getComputedStyle(el).cursor === "pointer" && getComputedStyle(el.parentElement || el).cursor !== "pointer";
       return (handler || pointer) && visible(el);
     })
@@ -152,10 +159,15 @@ export function pageChecks({ isMobile }) {
     footer: document.querySelectorAll("footer, [role=contentinfo]").length,
   };
 
-  // Readability: Amstad (German) or Flesch reading ease (English). Rough syllable heuristic.
+  // Readability: Amstad (German) or Flesch reading ease (English) on prose paragraphs only.
+  // App chrome (buttons, tables, labels) without sentence punctuation would distort sentence length.
   const lang = (document.documentElement.lang || "").toLowerCase();
   const root = document.querySelector("main, [role=main]") || document.body;
-  const text = (root.innerText || "").replace(/\s+/g, " ");
+  const text = [...root.querySelectorAll("p")]
+    .filter(visible)
+    .map(textOf)
+    .filter((t) => /[.!?]/.test(t) && t.split(/\s+/).length >= 6)
+    .join(" ");
   const sentences = text.split(/[.!?]+(?:\s|$)/).filter((s) => s.trim().split(/\s+/).length >= 3);
   const words = text.match(/\p{L}+/gu) || [];
   const syllables = words.reduce((s, w) => s + Math.max(1, (w.toLowerCase().match(/[aeiouyäöüàâéèêëîïôûù]+/g) || []).length), 0);
@@ -219,15 +231,29 @@ export function reflowCheck() {
   return { viewportWidth: vw, scrollWidth: sw, horizontalScroll: sw > vw + 1, offenders };
 }
 
-// Records the focused element and its focus styling. The style of the previously
-// focused element is compared with its unfocused style to detect a missing indicator.
+// Records the focused element and its focus styling (including ::before/::after and
+// :focus-within wrappers). The style of the previously focused element is compared with
+// its unfocused style to detect a missing indicator.
 export function focusProbe() {
   const sel = window.__uiSel;
-  const props = ["outlineStyle", "outlineWidth", "outlineColor", "boxShadow", "borderColor", "backgroundColor", "color", "textDecorationLine"];
-  const styleOf = (el) => {
-    const cs = getComputedStyle(el);
-    return props.map((p) => cs[p]).join("|");
+  const props = ["outlineStyle", "outlineWidth", "outlineColor", "outlineOffset", "boxShadow", "borderColor", "backgroundColor", "color", "textDecorationLine"];
+  const pseudoProps = ["content", "outlineStyle", "outlineWidth", "outlineColor", "boxShadow", "borderColor", "backgroundColor", "opacity"];
+  const ancestorProps = ["outlineStyle", "outlineWidth", "outlineColor", "boxShadow", "borderColor", "backgroundColor"];
+  const readStyle = (el, ps, pseudo) => {
+    const cs = pseudo ? getComputedStyle(el, pseudo) : getComputedStyle(el);
+    return ps.map((p) => cs[p]).join("|");
   };
+  const ancestorsOf = (el) => {
+    const out = [];
+    for (let p = el.parentElement, d = 0; p && p !== document.body && d < 3; p = p.parentElement, d++) out.push(p);
+    return out;
+  };
+  const styleOf = (el) => [
+    readStyle(el, props),
+    readStyle(el, pseudoProps, "::before"),
+    readStyle(el, pseudoProps, "::after"),
+    ...ancestorsOf(el).map((p) => readStyle(p, ancestorProps)),
+  ].join("||");
   const result = {};
   const prev = window.__uiFocusPrev;
   // Tab can move inside one element (date/time input segments, some custom widgets):
