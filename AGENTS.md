@@ -1,6 +1,6 @@
 # sgstack
 
-Personal, harness-neutral agent stack: skills, global agent rules and the baseline for all SG303 repositories. Used with Claude Code, Codex and opencode via T3 Code.
+Personal, harness-neutral agent stack: skills, global agent rules and the baseline for all SG303 repositories. Used with Claude Code, Codex, opencode and Antigravity via T3 Code.
 
 This repo defines the SG303 baseline and follows it (baseline v2): work on a
 branch, open a PR, merge only with green checks (squash); English for
@@ -20,7 +20,7 @@ everything in the repo; talk to me in German.
 ## Layout
 
 - `skills/<name>/SKILL.md`: one directory per skill. The directory name equals the `name` in the frontmatter.
-- `global/AGENTS.md`: global rules for every agent and repo, symlinked to `~/.codex/AGENTS.md`, `~/.claude/rules/sg303-global.md` and `~/.config/opencode/AGENTS.md`.
+- `global/AGENTS.md`: global rules for every agent and repo, symlinked to `~/.codex/AGENTS.md`, `~/.claude/rules/sg303-global.md`, `~/.config/opencode/AGENTS.md` and `~/.gemini/config/AGENTS.md`.
 - `baseline/`: tool canon (`tools.md`), checklist (`baseline.yml`) and runbook (`weekly-check.md`) for the weekly health check, and templates for other repos.
 - `scripts/install.sh`: symlinks skills and global rules into every harness.
 

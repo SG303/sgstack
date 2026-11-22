@@ -72,17 +72,47 @@ class ScriptTests(unittest.TestCase):
         unrelated.mkdir(parents=True)
         (unrelated / "SKILL.md").write_text("unrelated\n")
 
+        skill_bases = (
+            self.work / ".claude/skills",
+            self.work / ".agents/skills",
+            self.work / ".gemini/config/skills",
+        )
         self.install()
-        for base in (self.work / ".claude/skills", self.work / ".agents/skills"):
+        for base in skill_bases:
             for skill in skills:
                 self.assertEqual((base / skill).readlink(), ROOT / "skills" / skill)
 
         self.install("--uninstall")
-        for base in (self.work / ".claude/skills", self.work / ".agents/skills"):
+        for base in skill_bases:
             for skill in skills:
                 self.assertFalse((base / skill).exists())
                 self.assertFalse((base / skill).is_symlink())
         self.assertTrue((unrelated / "SKILL.md").is_file())
+
+    def test_install_links_and_uninstalls_global_rules_for_all_harnesses(self):
+        rule_links = (
+            self.work / ".codex/AGENTS.md",
+            self.work / ".claude/rules/sg303-global.md",
+            self.work / ".config/opencode/AGENTS.md",
+            self.work / ".gemini/config/AGENTS.md",
+        )
+        self.install()
+        for link in rule_links:
+            self.assertEqual(link.readlink(), ROOT / "global/AGENTS.md")
+
+        self.install("--uninstall")
+        for link in rule_links:
+            self.assertFalse(link.exists())
+            self.assertFalse(link.is_symlink())
+
+    def test_install_preserves_conflicting_antigravity_rules(self):
+        rules = self.work / ".gemini/config/AGENTS.md"
+        rules.parent.mkdir(parents=True)
+        rules.write_text("Existing Antigravity rules\n")
+        self.install()
+        self.assertEqual(rules.read_text(), "Existing Antigravity rules\n")
+        self.install("--uninstall")
+        self.assertEqual(rules.read_text(), "Existing Antigravity rules\n")
 
     def prepare_setup(self, installed):
         script = self.work / "setup.sh"

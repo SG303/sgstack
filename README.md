@@ -2,7 +2,7 @@
 
 # sgstack
 
-Personal agent stack that works across harnesses (Claude Code, Codex, opencode):
+Personal agent stack that works across harnesses (Claude Code, Codex, opencode, Antigravity):
 
 - **Skills**: plain `SKILL.md` files in the shared Agent Skills format.
 - **Global rules**: one [`global/AGENTS.md`](global/AGENTS.md) that every harness reads.
@@ -17,14 +17,14 @@ Created in [T3 Code](https://t3.codes).
 
 | Skill | What it does |
 | --- | --- |
-| [`cpm`](skills/cpm/SKILL.md) | Write "cpm" to finalize the current task: check existing changes, commit, push, open or update a PR, squash-merge it, delete the branch and complete the GitHub release if the repo has a release process. |
+| [`cpm`](skills/cpm/SKILL.md) | Write "cpm" to finalize the current task: check existing changes, commit, push, open or update a PR, squash-merge it, delete the branch and complete the release if the repo has a release process. |
 | [`sol-loop`](skills/sol-loop/SKILL.md) | Write "sol loop" to review a change with one GPT Sol reviewer, resolve findings and recheck within a bounded round budget. |
 | [`takeover`](skills/takeover/SKILL.md) | Ask to take over a PR, branch or agent thread: recover its goal, finish the remaining work and preserve contributor credit. |
-| [`grill`](skills/grill/SKILL.md) | Write "grill" with an idea to be interviewed in rounds of questions with recommended answers, then get a confirmed spec with acceptance criteria and verification steps as a GitHub issue. Plans only; build it with `yolo #<issue>`. |
+| [`grill`](skills/grill/SKILL.md) | Write "grill" with an idea to be interviewed in rounds of questions with recommended answers, then get a confirmed spec with acceptance criteria and verification steps as an issue. Plans only; build it with `yolo #<issue>`. |
 | [`review`](skills/review/SKILL.md) | Ask for a general review of a project, selected code, diff, PR or non-code artifact to get a read-only report covering bugs, security, best practices, requirements fit, concrete improvements and potential new features. |
 | [`council`](skills/council/SKILL.md) | Write "council" for independent feedback from three models on different providers, with bounded review rounds and a synthesis of findings and disagreements. |
 | [`ui-review`](skills/ui-review/SKILL.md) | Review a web UI against WCAG 2.2, Core Web Vitals, Nielsen, ISO 9241-110, deceptive patterns and the detected design system, with independent Claude/Codex jurors filling in UEQ-S, SUS and VisAWI-S. Reviews are read-only; an explicit request to improve or fix the UI enables iterations and a before/after report. Needs Node 18+; run `skills/ui-review/scripts/setup.sh` once. |
-| [`yolo`](skills/yolo/SKILL.md) | Write "yolo" in a prompt and the agent implements, tests, commits, pushes, opens a PR, squash-merges it and completes the repo's established GitHub release process without asking. |
+| [`yolo`](skills/yolo/SKILL.md) | Write "yolo" in a prompt and the agent implements, tests, commits, pushes, opens a PR, squash-merges it and completes the repo's established release process without asking. |
 
 ## Install
 
@@ -38,6 +38,7 @@ scripts/install.sh --uninstall  # remove those links again
 | Claude Code | `~/.claude/skills` | `~/.claude/rules/sg303-global.md` (user-level rules, loaded independently of project `CLAUDE.md` files) |
 | Codex | `~/.agents/skills` | `~/.codex/AGENTS.md` (or `$CODEX_HOME/AGENTS.md`) |
 | opencode | `~/.config/opencode/skills`, `~/.claude/skills`, `~/.agents/skills` | `~/.config/opencode/AGENTS.md` |
+| Antigravity | `~/.gemini/config/skills` | `~/.gemini/config/AGENTS.md` |
 
 Because everything is a symlink, `git pull` updates every harness at once.
 Re-run the installer after adding new skills to create their links. Existing

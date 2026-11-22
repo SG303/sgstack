@@ -3,13 +3,15 @@
 # `git pull` updates all of them at once. Re-run after adding a skill.
 #
 # Skills (skills/<name>/):
-#   ~/.claude/skills  Claude Code (opencode reads it too)
-#   ~/.agents/skills  Codex and opencode
+#   ~/.claude/skills         Claude Code (opencode reads it too)
+#   ~/.agents/skills         Codex and opencode
+#   ~/.gemini/config/skills  Antigravity
 #
 # Global rules (global/AGENTS.md):
 #   ${CODEX_HOME:-~/.codex}/AGENTS.md  read by Codex
 #   ~/.claude/rules/sg303-global.md    read by Claude Code in every project
 #   ~/.config/opencode/AGENTS.md       read by opencode
+#   ~/.gemini/config/AGENTS.md         read by Antigravity
 #
 # Existing files that are not links to this repo are never touched.
 #
@@ -17,12 +19,17 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-skill_targets=("$HOME/.claude/skills" "$HOME/.agents/skills")
+skill_targets=(
+	"$HOME/.claude/skills"
+	"$HOME/.agents/skills"
+	"$HOME/.gemini/config/skills"
+)
 rules_src="$repo_root/global/AGENTS.md"
 rules_links=(
 	"${CODEX_HOME:-$HOME/.codex}/AGENTS.md"
 	"$HOME/.claude/rules/sg303-global.md"
 	"${XDG_CONFIG_HOME:-$HOME/.config}/opencode/AGENTS.md"
+	"$HOME/.gemini/config/AGENTS.md"
 )
 mode=install
 

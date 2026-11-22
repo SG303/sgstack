@@ -5,7 +5,7 @@ workflows everywhere, whichever agent does the work.
 
 | File | Purpose |
 | --- | --- |
-| [`../global/AGENTS.md`](../global/AGENTS.md) | Global rules for every agent and repo. Installed for Claude Code, Codex and opencode by `scripts/install.sh`. |
+| [`../global/AGENTS.md`](../global/AGENTS.md) | Global rules for every agent and repo. Installed for Claude Code, Codex, opencode and Antigravity by `scripts/install.sh`. |
 | [`tools.md`](tools.md) | Tool canon: one tool per job. |
 | [`baseline.yml`](baseline.yml) | Checklist the weekly repo health check compares every repo against. |
 | [`weekly-check.md`](weekly-check.md) | Runbook of the weekly repo health check. |
