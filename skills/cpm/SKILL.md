@@ -1,14 +1,15 @@
 ---
 name: cpm
-description: Use when the user instructs "cpm" or asks to commit, push and merge the current task. Finalize existing changes through a pull request and, if the repo has an established GitHub release process, complete the release, without further confirmation. Mentioning or discussing the skill does not activate it.
+description: Use when the user instructs "cpm" or asks to commit, push and merge the current task. Finalize existing changes through a pull request and, if the repo has an established release process, complete the release, without further confirmation. Mentioning or discussing the skill does not activate it.
 ---
 
 # CPM — Commit, Push, Merge
 
 Finish the current task's changes. Invoking CPM authorizes committing,
 pushing, opening or updating a PR, merging it, and completing the repo's
-established GitHub release process if it has one. Authorization covers
-this task only. Follow the repository's own rules.
+established release process if it has one. Authorization covers this task
+only. Follow the repository's own rules, including its configured Git forge
+CLI or MCP tool when the repo does not use GitHub/`gh`.
 
 ## Workflow
 
@@ -29,13 +30,16 @@ this task only. Follow the repository's own rules.
    and delete the branch, unless the repository specifies otherwise. If the
    harness cannot wait for checks and the repo has auto-merge, enable it and
    report the merge as pending.
-7. Complete the GitHub release, if the repo expects one. Inspect the repo's
-   release documentation, workflows and recent releases to determine its
-   versioning and release process. Proceed only after the PR has merged.
-   - If CI creates the release, verify that it completes successfully.
+7. Complete the release, if the repo expects one. Inspect the repo's release
+   documentation, workflows and recent releases to determine its versioning
+   and release process. Proceed only after the PR has merged.
+   - If CI creates the release, verify that the triggered workflow and
+     release artifacts complete successfully.
+   - If a release is triggered by a tag, push the tag after merge and verify
+     that the triggered release workflow completes.
    - If a separate release PR is required, follow that process and merge it
      only after its required checks and reviews pass.
-   - If the process requires a manual GitHub release, create it using the
+   - If the process requires a manual release, create it in English using the
      repo's version, tag and release-note conventions.
    - Check for an existing release first; do not create duplicates. Verify
      that the release targets the merged commit.
@@ -43,18 +47,24 @@ this task only. Follow the repository's own rules.
      release is expected but its version or procedure is unclear, stop and
      ask instead of guessing. If release automation fails, report it; do not
      bypass it with a manual release.
-8. Return to the default branch, update it and remove the local feature
-   branch when this can be done without disturbing unrelated work.
+8. Stop any temporary dev server or container started during this task.
+   Return to the default branch, update it and remove the local feature
+   branch when this can be done without disturbing unrelated work. If you
+   are in a linked git worktree where the default branch is already checked
+   out elsewhere, detach at `origin/<default>` (or leave the checkout clean)
+   and remove the local feature branch instead of failing on checkout.
 9. Report the PR URL, merge status, release URL or status and validation.
    Clearly identify anything still pending.
 
 If the repository explicitly permits direct pushes for this workflow,
 follow that convention instead of creating a PR.
-If there is no remote or no `gh`, stop after the local commit and say so.
+If there is no remote or no CLI/tool for the configured forge (`gh` on
+GitHub, or the tool documented by the repo), stop after the local commit
+and say so.
 
 ## Boundaries
 
-- Do not implement new features, publish packages or deploy. GitHub releases
+- Do not implement new features, publish packages or deploy. Releases
   following the repo's established process are authorized.
 - Do not include unrelated changes or secrets.
 - Do not force-push, rewrite pushed history, skip hooks or signing, weaken

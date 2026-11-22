@@ -1,13 +1,14 @@
 ---
 name: grill
-description: Use when the user writes "grill" as an instruction to sharpen an idea, feature or project before anything is built. Interview the user in rounds of questions with recommended answers until the plan is clear, then, after the user confirms, write it up as a spec in a GitHub issue. Never implements. Discussing or installing the skill does not activate it.
+description: Use when the user writes "grill" as an instruction to sharpen an idea, feature or project before anything is built. Interview the user in rounds of questions with recommended answers until the plan is clear, then, after the user confirms, write it up as a spec in an issue. Never implements. Discussing or installing the skill does not activate it.
 ---
 
 # Grill
 
 Turn a vague idea into a spec an agent can build and verify without guessing.
-This skill plans only: no code, no branches, no commits. It ends with a
-GitHub issue, or with the summary in chat if there is no GitHub remote.
+This skill plans only: no code, no branches, no commits. It ends with an
+issue on the repository's Git forge, or with the summary in chat if there is
+no remote or issue tracker.
 
 ## Interview in rounds
 
@@ -45,7 +46,9 @@ Cover these in every interview, in whatever round they become answerable:
 Summarize the agreed plan and ask the user to confirm it. Do not create the
 issue before the user confirms; apply requested changes and confirm again.
 
-Then create one GitHub issue in English with `gh issue create`:
+Then create one issue in English with `gh issue create` on GitHub, or the
+forge CLI/MCP tool documented by the repository (if there is no remote or
+issue tracker, post the spec in chat instead):
 
 ```markdown
 ## Problem

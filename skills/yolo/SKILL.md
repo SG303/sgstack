@@ -1,13 +1,13 @@
 ---
 name: yolo
-description: Autonomous ship mode. Use when the user writes the word "yolo" as an instruction in their prompt, usually at the end. Implement the change, test it, then finish it with the cpm workflow (commit, push, PR, squash-merge, the repo's established GitHub release process) without asking for confirmation. If the word is clearly not an instruction (e.g. it is being discussed as a term), ask once before proceeding.
+description: Autonomous ship mode. Use when the user writes the word "yolo" as an instruction in their prompt, usually at the end. Implement the change, test it, then finish it with the cpm workflow (commit, push, PR, squash-merge, the repo's established release process) without asking for confirmation. If the word is clearly not an instruction (e.g. it is being discussed as a term), ask once before proceeding.
 ---
 
 # YOLO
 
 The user wrote "yolo". That pre-authorizes this one task from implementation
-through merge and the repo's established GitHub release process. The
-authorization ends with this task.
+through merge and the repo's established release process. The authorization
+ends with this task.
 
 YOLO is implementation plus `cpm`. This skill covers the implementation; the
 `cpm` skill covers everything from commit to release. The repo's own rules win
