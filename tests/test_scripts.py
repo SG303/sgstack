@@ -71,6 +71,7 @@ class ScriptTests(unittest.TestCase):
         self.assertIn("bootstrap-repo", skills)
         self.assertIn("debug", skills)
         self.assertIn("ops", skills)
+        self.assertIn("research", skills)
         self.assertIn("review", skills)
         self.assertIn("sparring", skills)
         unrelated = self.work / ".claude/skills/custom-skill"
