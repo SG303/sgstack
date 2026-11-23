@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- New `bootstrap-repo` skill guides new repository setup, existing repository baseline retrofits, private-to-public readiness, and read-only baseline audits using `sgstack/baseline/` as the single source of truth, with plan-first approval, a full-history secret/PII hard gate, safe doc merging, forge neutrality, local-only edits, non-bypassable `yolo` gates and a tailored external forge settings checklist.
 - New `research` skill guides structured, source-backed technical research (compact lookups and in-depth comparisons/feasibility checks, with or without an open repository) with primary-source priority, three-tier evidence labeling, strict fact-vs-judgment separation, privacy redaction before external searches, read-only chat reports by default, non-implementing `yolo` handling and optional `council` fact-checking.
 - New `sparring` skill acts as a constructive, read-only thought partner in chat to develop rough ideas and stress-test assumptions upstream of `grill`, pairing grounded pushback and simpler alternatives with anti-sycophancy/anti-cynicism guardrails and optional read-only repo/web reality checks.
 - New `debug` skill guides systematic software debugging (diagnose-only and debug-and-fix paths) with a strict reproduction gate, methodical hypothesis testing and root-cause proof, a circuit breaker against trial-and-error loops, fail-before/pass-after regression tests, mandatory cleanup of temporary diagnostics and non-bypassable gates under `yolo`.
