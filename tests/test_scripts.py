@@ -71,6 +71,7 @@ class ScriptTests(unittest.TestCase):
         self.assertIn("debug", skills)
         self.assertIn("ops", skills)
         self.assertIn("review", skills)
+        self.assertIn("sparring", skills)
         unrelated = self.work / ".claude/skills/custom-skill"
         unrelated.mkdir(parents=True)
         (unrelated / "SKILL.md").write_text("unrelated\n")
