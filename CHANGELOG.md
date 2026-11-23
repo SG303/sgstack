@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - New `bootstrap-repo` skill guides new repository setup, existing repository baseline retrofits, private-to-public readiness, and read-only baseline audits using `sgstack/baseline/` as the single source of truth, with plan-first approval, a full-history secret/PII hard gate, safe doc merging, forge neutrality, local-only edits, non-bypassable `yolo` gates and a tailored external forge settings checklist.
+- New `sparring` skill acts as a constructive, read-only thought partner in chat to develop rough ideas and stress-test assumptions upstream of `grill`, pairing grounded pushback and simpler alternatives with anti-sycophancy/anti-cynicism guardrails and optional read-only repo/web reality checks.
 - New `debug` skill guides systematic software debugging (diagnose-only and debug-and-fix paths) with a strict reproduction gate, methodical hypothesis testing and root-cause proof, a circuit breaker against trial-and-error loops, fail-before/pass-after regression tests, mandatory cleanup of temporary diagnostics and non-bypassable gates under `yolo`.
 - New `ops` skill guides self-hosted operations tasks (read-only diagnostics and plan-first live changes) with repo-first context, live-vs-doc drift checks, GitOps precedence, backup/snapshot gates, post-change verification, cleanup retention and local documentation updates.
 - `scripts/install.sh` now installs global rules (`~/.gemini/config/AGENTS.md`) and skills (`~/.gemini/config/skills`) for Antigravity alongside Claude Code, Codex and opencode.
@@ -35,6 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- `scripts/install.sh` now also links `global/AGENTS.md` into existing T3 Code Antigravity provider directories (`${T3CODE_HOME:-~/.t3}/userdata/providers/antigravity/*/config/AGENTS.md`), because T3 Code launches Antigravity with an isolated `--gemini-dir` instead of reading `~/.gemini/config/AGENTS.md`.
 - CI runs the script regression tests, and the baseline validator rejects files that name an outdated baseline version.
 - Fix threads started by the weekly health check point to the installed global rules instead of a removed path.
 - Make UI reviews read-only by default; require an explicit request to improve or fix the UI before changing project files.

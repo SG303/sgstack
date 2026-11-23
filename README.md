@@ -20,6 +20,7 @@ Created in [T3 Code](https://t3.codes).
 | [`cpm`](skills/cpm/SKILL.md) | Write "cpm" to finalize the current task: check existing changes, commit, push, open or update a PR, squash-merge it, delete the branch and complete the release if the repo has a release process. |
 | [`sol-loop`](skills/sol-loop/SKILL.md) | Write "sol loop" to review a change with one GPT Sol reviewer, resolve findings and recheck within a bounded round budget. |
 | [`takeover`](skills/takeover/SKILL.md) | Ask to take over a PR, branch or agent thread: recover its goal, finish the remaining work and preserve contributor credit. |
+| [`sparring`](skills/sparring/SKILL.md) | Write "sparring" or ask to think through or challenge an idea for a constructive, read-only dialogue that develops rough ideas, stress-tests assumptions, pushes back with simpler alternatives without turning cynical or sycophantic, and optionally hands off to `grill`. |
 | [`grill`](skills/grill/SKILL.md) | Write "grill" with an idea to be interviewed in rounds of questions with recommended answers, then get a confirmed spec with acceptance criteria and verification steps as an issue. Plans only; build it with `yolo #<issue>`. |
 | [`review`](skills/review/SKILL.md) | Ask for a general review of a project, selected code, diff, PR or non-code artifact to get a read-only report covering bugs, security, best practices, requirements fit, concrete improvements and potential new features. |
 | [`ops`](skills/ops/SKILL.md) | Write "ops" or ask for a self-hosted operations task (updates, migrations, config/proxy/TLS changes, backups, cutovers, rollbacks or live troubleshooting) for a repo-first, plan-first workflow with backup/snapshot gates, GitOps awareness, live verification, cleanup retention and local infrastructure doc updates. |
@@ -41,7 +42,7 @@ scripts/install.sh --uninstall  # remove those links again
 | Claude Code | `~/.claude/skills` | `~/.claude/rules/sg303-global.md` (user-level rules, loaded independently of project `CLAUDE.md` files) |
 | Codex | `~/.agents/skills` | `~/.codex/AGENTS.md` (or `$CODEX_HOME/AGENTS.md`) |
 | opencode | `~/.config/opencode/skills`, `~/.claude/skills`, `~/.agents/skills` | `~/.config/opencode/AGENTS.md` |
-| Antigravity | `~/.gemini/config/skills` | `~/.gemini/config/AGENTS.md` |
+| Antigravity | `~/.gemini/config/skills` | `~/.gemini/config/AGENTS.md` (plus `${T3CODE_HOME:-~/.t3}/userdata/providers/antigravity/*/config/AGENTS.md` when present) |
 
 Because everything is a symlink, `git pull` updates every harness at once.
 Re-run the installer after adding new skills to create their links. Existing
