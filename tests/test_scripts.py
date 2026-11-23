@@ -25,6 +25,7 @@ class ScriptTests(unittest.TestCase):
             "HOME": str(self.work),
             "CODEX_HOME": str(self.work / ".codex"),
             "XDG_CONFIG_HOME": str(self.work / ".config"),
+            "T3CODE_HOME": str(self.work / ".t3"),
         }
         subprocess.run(
             ["bash", str(ROOT / "scripts/install.sh"), *args],
@@ -115,6 +116,31 @@ class ScriptTests(unittest.TestCase):
         self.assertEqual(rules.read_text(), "Existing Antigravity rules\n")
         self.install("--uninstall")
         self.assertEqual(rules.read_text(), "Existing Antigravity rules\n")
+
+    def test_install_links_and_uninstalls_t3_antigravity_rules(self):
+        provider_cfg = self.work / ".t3/userdata/providers/antigravity/inst1/config"
+        provider_cfg.mkdir(parents=True)
+        link = provider_cfg / "AGENTS.md"
+        self.install()
+        self.install()
+        self.assertEqual(link.readlink(), ROOT / "global/AGENTS.md")
+        self.install("--uninstall")
+        self.install("--uninstall")
+        self.assertFalse(link.exists())
+        self.assertFalse(link.is_symlink())
+
+    def test_install_preserves_conflicting_t3_antigravity_rules(self):
+        rules = self.work / ".t3/userdata/providers/antigravity/inst1/config/AGENTS.md"
+        rules.parent.mkdir(parents=True)
+        rules.write_text("Existing T3 Antigravity rules\n")
+        self.install()
+        self.assertEqual(rules.read_text(), "Existing T3 Antigravity rules\n")
+        self.install("--uninstall")
+        self.assertEqual(rules.read_text(), "Existing T3 Antigravity rules\n")
+
+    def test_install_skips_t3_antigravity_when_absent(self):
+        self.install()
+        self.assertFalse((self.work / ".t3").exists())
 
     def prepare_setup(self, installed):
         script = self.work / "setup.sh"
