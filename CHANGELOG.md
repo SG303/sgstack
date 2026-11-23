@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- New `ops` skill guides self-hosted operations tasks (read-only diagnostics and plan-first live changes) with repo-first context, live-vs-doc drift checks, GitOps precedence, backup/snapshot gates, post-change verification, cleanup retention and local documentation updates.
 - `scripts/install.sh` now installs global rules (`~/.gemini/config/AGENTS.md`) and skills (`~/.gemini/config/skills`) for Antigravity alongside Claude Code, Codex and opencode.
 - New `review` skill performs a lightweight, read-only review of a project, selected code, diff, PR or non-code artifact covering bugs, security, best practices, requirements fit, concrete improvements and potential new features.
 - New `grill` skill interviews you about an idea in rounds of questions with recommended answers and writes the confirmed plan as a GitHub spec issue with acceptance criteria and verification steps.

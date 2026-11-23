@@ -67,6 +67,7 @@ class ScriptTests(unittest.TestCase):
 
     def test_install_links_and_uninstalls_every_skill(self):
         skills = sorted(p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md"))
+        self.assertIn("ops", skills)
         self.assertIn("review", skills)
         unrelated = self.work / ".claude/skills/custom-skill"
         unrelated.mkdir(parents=True)
