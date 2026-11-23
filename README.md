@@ -40,7 +40,7 @@ scripts/install.sh --uninstall  # remove those links again
 | Claude Code | `~/.claude/skills` | `~/.claude/rules/sg303-global.md` (user-level rules, loaded independently of project `CLAUDE.md` files) |
 | Codex | `~/.agents/skills` | `~/.codex/AGENTS.md` (or `$CODEX_HOME/AGENTS.md`) |
 | opencode | `~/.config/opencode/skills`, `~/.claude/skills`, `~/.agents/skills` | `~/.config/opencode/AGENTS.md` |
-| Antigravity | `~/.gemini/config/skills` | `~/.gemini/config/AGENTS.md` |
+| Antigravity | `~/.gemini/config/skills` | `~/.gemini/config/AGENTS.md` (plus `${T3CODE_HOME:-~/.t3}/userdata/providers/antigravity/*/config/AGENTS.md` when present) |
 
 Because everything is a symlink, `git pull` updates every harness at once.
 Re-run the installer after adding new skills to create their links. Existing

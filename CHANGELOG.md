@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- `scripts/install.sh` now also links `global/AGENTS.md` into existing T3 Code Antigravity provider directories (`${T3CODE_HOME:-~/.t3}/userdata/providers/antigravity/*/config/AGENTS.md`), because T3 Code launches Antigravity with an isolated `--gemini-dir` instead of reading `~/.gemini/config/AGENTS.md`.
 - CI runs the script regression tests, and the baseline validator rejects files that name an outdated baseline version.
 - Fix threads started by the weekly health check point to the installed global rules instead of a removed path.
 - Make UI reviews read-only by default; require an explicit request to improve or fix the UI before changing project files.

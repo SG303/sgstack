@@ -20,7 +20,7 @@ everything in the repo; talk to me in German.
 ## Layout
 
 - `skills/<name>/SKILL.md`: one directory per skill. The directory name equals the `name` in the frontmatter.
-- `global/AGENTS.md`: global rules for every agent and repo, symlinked to `~/.codex/AGENTS.md`, `~/.claude/rules/sg303-global.md`, `~/.config/opencode/AGENTS.md` and `~/.gemini/config/AGENTS.md`.
+- `global/AGENTS.md`: global rules for every agent and repo, symlinked to `~/.codex/AGENTS.md`, `~/.claude/rules/sg303-global.md`, `~/.config/opencode/AGENTS.md`, `~/.gemini/config/AGENTS.md` and any existing T3 Code Antigravity provider directory (`${T3CODE_HOME:-~/.t3}/userdata/providers/antigravity/*/config/AGENTS.md`).
 - `baseline/`: tool canon (`tools.md`), checklist (`baseline.yml`) and runbook (`weekly-check.md`) for the weekly health check, and templates for other repos.
 - `scripts/install.sh`: symlinks skills and global rules into every harness.
 

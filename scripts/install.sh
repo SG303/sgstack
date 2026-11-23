@@ -11,7 +11,9 @@
 #   ${CODEX_HOME:-~/.codex}/AGENTS.md  read by Codex
 #   ~/.claude/rules/sg303-global.md    read by Claude Code in every project
 #   ~/.config/opencode/AGENTS.md       read by opencode
-#   ~/.gemini/config/AGENTS.md         read by Antigravity
+#   ~/.gemini/config/AGENTS.md         read by Antigravity CLI
+#   ${T3CODE_HOME:-~/.t3}/userdata/providers/antigravity/*/config/AGENTS.md
+#                                      read by Antigravity inside T3 Code (when present)
 #
 # Existing files that are not links to this repo are never touched.
 #
@@ -31,6 +33,13 @@ rules_links=(
 	"${XDG_CONFIG_HOME:-$HOME/.config}/opencode/AGENTS.md"
 	"$HOME/.gemini/config/AGENTS.md"
 )
+t3_antigravity_root="${T3CODE_HOME:-$HOME/.t3}/userdata/providers/antigravity"
+if [[ -d $t3_antigravity_root ]]; then
+	for provider_dir in "$t3_antigravity_root"/*/; do
+		[[ -d $provider_dir ]] || continue
+		rules_links+=("${provider_dir%/}/config/AGENTS.md")
+	done
+fi
 mode=install
 
 case "${1:-}" in
