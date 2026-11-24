@@ -1,6 +1,6 @@
 ---
 name: sparring
-description: Use when the user writes "sparring" or explicitly asks to develop, think through, or critically challenge an existing idea before specifying or building. Acts as a constructive, read-only thought partner in chat that develops rough ideas, stress-tests assumptions, pushes back with grounded alternatives without turning cynical or sycophantic, and optionally hands off to grill. If the user has no idea yet and wants new ones, use spark instead. Do not trigger for spark, grill, review, council, debug, or ops, or when only discussing or installing the skill.
+description: Use when the user writes "sparring" or explicitly asks to develop, think through, or critically challenge an existing idea before specifying or building. Acts as a constructive, read-only thought partner in chat that develops rough ideas, stress-tests assumptions, pushes back with grounded alternatives without turning cynical or sycophantic, and optionally hands off to grill. If the user has no idea yet and wants new ones, use spark instead. Do not trigger for spark, grill, architect, review, council, debug, or ops, or when only discussing or installing the skill.
 ---
 
 # Sparring
@@ -96,7 +96,8 @@ user explicitly asks in a follow-up.
   issues.
 - **Distinct from sibling skills**: Send requests for ideas from scratch to
   `spark`. Hand off settled ideas to `grill` for a
-  buildable specification issue, `review` for code/artifact audits, `council`
+  buildable specification issue, `architect` for technical software
+  architecture design, `review` for code/artifact audits, `council`
   for multi-model feedback, `debug` for software defects, and `ops` for live
   infrastructure operations.
 - **Honest about uncertainty**: Never fabricate search results, tool features,
