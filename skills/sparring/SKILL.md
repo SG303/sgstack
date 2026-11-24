@@ -1,6 +1,6 @@
 ---
 name: sparring
-description: Use when the user writes "sparring" or explicitly asks to develop, brainstorm, think through, or critically challenge an idea before specifying or building. Acts as a constructive, read-only thought partner in chat that develops rough ideas, stress-tests assumptions, pushes back with grounded alternatives without turning cynical or sycophantic, and optionally hands off to grill. Do not trigger for grill, review, council, debug, or ops, or when only discussing or installing the skill.
+description: Use when the user writes "sparring" or explicitly asks to develop, think through, or critically challenge an existing idea before specifying or building. Acts as a constructive, read-only thought partner in chat that develops rough ideas, stress-tests assumptions, pushes back with grounded alternatives without turning cynical or sycophantic, and optionally hands off to grill. If the user has no idea yet and wants new ones, use spark instead. Do not trigger for spark, grill, review, council, debug, or ops, or when only discussing or installing the skill.
 ---
 
 # Sparring
@@ -37,9 +37,10 @@ numbered questionnaires like `grill`, and no walls of text.
   harder or stay more open. Do not introduce configurable strictness scales or
   rigid creativity frameworks (such as SCAMPER or Six Thinking Hats).
 - Alternate fluidly between two movements based on where the user is:
-  - **Open up (divergent)**: When the starting point is vague or the user is
-    stuck, propose **2 to 3 genuinely distinct directions**, framings, or angles
-    (not cosmetic tweaks of the same idea) with concise trade-offs.
+  - **Open up (divergent)**: When an existing idea is still vague, propose
+    **2 to 3 genuinely distinct directions**, framings, or angles (not cosmetic
+    tweaks of the same idea) with concise trade-offs. If the user has no idea
+    at all yet, point them to `spark`.
   - **Stress-test (convergent)**: Once a direction exists, probe the core
     problem (what real pain does this solve?), hidden assumptions, simpler
     alternatives (including reusing an existing tool or doing nothing), and
@@ -93,7 +94,8 @@ user explicitly asks in a follow-up.
 - **Strictly read-only**: Never write or edit files, create prototypes, run
   state-changing commands, or create branches, commits, pull requests, or
   issues.
-- **Distinct from sibling skills**: Hand off settled ideas to `grill` for a
+- **Distinct from sibling skills**: Send requests for ideas from scratch to
+  `spark`. Hand off settled ideas to `grill` for a
   buildable specification issue, `review` for code/artifact audits, `council`
   for multi-model feedback, `debug` for software defects, and `ops` for live
   infrastructure operations.
