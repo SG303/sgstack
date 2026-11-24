@@ -63,7 +63,8 @@ issue tracker, post the spec in chat instead):
 <exact commands, URLs or steps and the expected result>
 ```
 
-Report the issue URL and stop. The user starts the work, for example with
+Report the issue URL and stop. The user starts the work — for example with
+`architect` for a new project or major refactor, or directly with
 `yolo #<number>`.
 
 ## Boundaries

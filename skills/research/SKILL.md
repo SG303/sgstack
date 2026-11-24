@@ -1,6 +1,6 @@
 ---
 name: research
-description: Use when the user writes "research" (or "recherchiere") or asks for structured technical research, tool or library comparisons, feasibility checks, architecture trade-offs, or standards/API evaluations — inside a repository or with no project attached. Enforces primary-source priority, three-tier evidence labeling (verified primary source with date/version, secondary source, or unverified model knowledge), strict fact-vs-judgment separation, privacy redaction before external searches, and read-only chat reports by default. Do not trigger for simple one-off factual questions that need no research, code or artifact reviews (review), concrete defect debugging (debug), live self-hosted operations (ops), feature spec interviews (grill), UI/UX audits (ui-review), multi-model reviews (council), or when only discussing or installing the skill.
+description: Use when the user writes "research" (or "recherchiere") or asks for structured technical research, tool or library comparisons, feasibility checks, architecture trade-offs, or standards/API evaluations — inside a repository or with no project attached. Enforces primary-source priority, three-tier evidence labeling (verified primary source with date/version, secondary source, or unverified model knowledge), strict fact-vs-judgment separation, privacy redaction before external searches, and read-only chat reports by default. Do not trigger for simple one-off factual questions that need no research, code or artifact reviews (review), concrete defect debugging (debug), live self-hosted operations (ops), feature spec interviews (grill), software architecture blueprints (architect), UI/UX audits (ui-review), multi-model reviews (council), or when only discussing or installing the skill.
 ---
 
 # Research — Structured Source-Backed Research
@@ -100,8 +100,8 @@ Present one compact, scannable, portable Markdown report directly in chat.
 For consequential, high-stakes, or contested decisions, offer an optional
 fact-check or second-opinion pass via `council` in the next steps — launch
 `council` only if the user explicitly asks for it. Where appropriate, also offer
-handing off a chosen direction to `grill` (to turn it into a spec) or saving a
-local note.
+handing off a chosen direction to `grill` (to turn it into a spec), `architect`
+(to design the technical architecture), or saving a local note.
 
 ## Report format
 
@@ -151,4 +151,4 @@ Use portable Markdown directly in chat. Match the format to the task depth:
   code, modifying live infrastructure (`ops`), installing packages, executing
   untrusted web scripts, bypassing paywalls/logins/CAPTCHAs, fabricating URLs or
   versions, auto-launching `council`, automatic Git publishing, and work owned
-  by `review`, `debug`, `ops`, `grill`, `ui-review`, or `council`.
+  by `review`, `debug`, `ops`, `grill`, `architect`, `ui-review`, or `council`.
