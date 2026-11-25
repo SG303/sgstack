@@ -73,6 +73,7 @@ class ScriptTests(unittest.TestCase):
         self.assertIn("debug", skills)
         self.assertIn("ops", skills)
         self.assertIn("research", skills)
+        self.assertIn("retro", skills)
         self.assertIn("review", skills)
         self.assertIn("spark", skills)
         self.assertIn("sparring", skills)
